@@ -1,0 +1,39 @@
+<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center px-3">
+  <div class="bg-white rounded-xl shadow-lg p-4 w-full max-w-md">
+    <h3 class="text-lg font-bold mb-3">
+      {{ task ? 'Edit Task' : 'Create Task' }}
+    </h3>
+
+    <!-- TITLE -->
+    <input
+      class="form-control mb-2"
+      [(ngModel)]="form.title"
+      name="title"
+      placeholder="Task Title"
+    />
+
+    <!-- DESCRIPTION -->
+    <input
+      class="form-control mb-2"
+      [(ngModel)]="form.description"
+      name="description"
+      placeholder="Description"
+    />
+
+    <!-- DATE -->
+    <input type="date" class="form-control mb-2" [(ngModel)]="form.dueDate" name="dueDate" />
+
+    <!-- STATUS -->
+    <select class="form-control mb-3" [(ngModel)]="form.status" name="status">
+      <option value="TODO">TODO</option>
+      <option value="IN_PROGRESS">IN_PROGRESS</option>
+      <option value="DONE">DONE</option>
+    </select>
+
+    <!-- BUTTONS -->
+    <div class="flex justify-end gap-2">
+      <button class="btn btn-success" (click)="save()">Save</button>
+      <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+    </div>
+  </div>
+</div>

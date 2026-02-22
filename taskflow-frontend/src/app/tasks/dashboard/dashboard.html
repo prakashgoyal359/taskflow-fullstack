@@ -1,0 +1,30 @@
+<app-navbar></app-navbar>
+<div class="container mt-4">
+  <!-- HEADER -->
+  <div class="flex justify-between mb-3">
+    <h2 class="text-xl font-bold">My Tasks</h2>
+    <button class="btn btn-primary" (click)="openForm()">+ New Task</button>
+  </div>
+
+  <!-- TASK GRID -->
+  <div class="row">
+    <div class="col-12 col-md-6 col-lg-4 mb-3" *ngFor="let t of tasks">
+      <div class="card p-3 shadow-sm h-100">
+        <h5 class="font-bold">{{ t.title }}</h5>
+        <p>{{ t.description }}</p>
+
+        <span class="badge bg-secondary mb-2">{{ t.status }}</span>
+        <p class="text-sm text-gray-500">Due: {{ t.dueDate }}</p>
+
+        <div class="flex justify-between mt-auto">
+          <button class="btn btn-warning btn-sm" (click)="editTask(t)">Edit</button>
+          <button class="btn btn-danger btn-sm" (click)="deleteTask(t.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK FORM MODAL -->
+<app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
+</app-task-form>

@@ -1,0 +1,57 @@
+<div class="flex min-h-screen">
+  <div class="hidden md:flex w-1/2 bg-[#274472] text-white justify-center items-center">
+    <h1 class="text-3xl font-bold">TaskFlow</h1>
+  </div>
+
+  <div class="flex flex-1 justify-center items-center bg-gray-100 px-4">
+    <div class="bg-white shadow-xl rounded-xl p-6 w-full max-w-md">
+      <h2 class="text-xl font-bold text-center mb-4">Create Account</h2>
+
+      <!-- NAME -->
+      <input
+        class="form-control mb-1"
+        [(ngModel)]="fullName"
+        (blur)="validateName()"
+        placeholder="Full Name"
+      />
+      <div class="text-red-500 text-sm mb-2">{{ nameError }}</div>
+
+      <!-- EMAIL -->
+      <input
+        class="form-control mb-1"
+        [(ngModel)]="email"
+        (blur)="validateEmail()"
+        placeholder="Email"
+      />
+      <div class="text-red-500 text-sm mb-2">{{ emailError }}</div>
+
+      <!-- PASSWORD -->
+      <input
+        type="password"
+        class="form-control mb-1"
+        [(ngModel)]="password"
+        (input)="checkStrength()"
+        placeholder="Password"
+      />
+      <div class="h-2 mb-2 rounded" [style.background]="passwordColor"></div>
+      <div class="text-red-500 text-sm mb-2">{{ passwordError }}</div>
+
+      <!-- CONFIRM -->
+      <input
+        type="password"
+        class="form-control mb-1"
+        [(ngModel)]="confirmPassword"
+        (blur)="validateConfirm()"
+        placeholder="Confirm Password"
+      />
+      <div class="text-red-500 text-sm mb-3">{{ confirmError }}</div>
+
+      <button class="btn btn-primary w-100" (click)="register()">Register</button>
+
+      <p class="text-center mt-3">
+        Already have account?
+        <a routerLink="/login" class="text-blue-600 cursor-pointer">Login</a>
+      </p>
+    </div>
+  </div>
+</div>

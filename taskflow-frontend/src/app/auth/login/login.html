@@ -1,0 +1,47 @@
+<div class="flex min-h-screen">
+  <!-- LEFT SIDE -->
+  <div class="hidden md:flex w-1/2 bg-[#274472] text-white justify-center items-center">
+    <h1 class="text-3xl font-bold">TaskFlow</h1>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="flex flex-1 justify-center items-center bg-gray-100 px-4">
+    <div class="bg-white shadow-xl rounded-xl p-6 w-full max-w-md">
+      <h2 class="text-xl font-bold text-center mb-4">Login</h2>
+
+      <!-- EMAIL -->
+      <input
+        class="form-control mb-1"
+        [(ngModel)]="email"
+        (blur)="validateEmail()"
+        placeholder="Email Address"
+      />
+
+      <div class="text-red-500 text-sm mb-2">
+        {{ emailError }}
+      </div>
+
+      <!-- PASSWORD -->
+      <input
+        type="password"
+        class="form-control mb-1"
+        [(ngModel)]="password"
+        (blur)="validatePassword()"
+        placeholder="Password"
+      />
+
+      <div class="text-red-500 text-sm mb-3">
+        {{ passwordError }}
+      </div>
+
+      <!-- LOGIN BUTTON -->
+      <button class="btn btn-primary w-100" (click)="login()">Login</button>
+
+      <!-- CREATE ACCOUNT -->
+      <p class="text-center mt-3 text-sm">
+        Don't have an account?
+        <a routerLink="/register" class="text-blue-600 cursor-pointer"> Create Account </a>
+      </p>
+    </div>
+  </div>
+</div>
