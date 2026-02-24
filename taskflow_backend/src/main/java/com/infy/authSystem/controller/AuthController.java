@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")   // allow Angular
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private final AuthService authService;
@@ -23,30 +23,22 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDto dto){
 
-        // call service
         authService.register(dto);
 
-        // return JSON instead of plain text
         return ResponseEntity.ok(
                 Map.of("message", "User Registered Successfully")
         );
     }
 
-    // 🔹 LOGIN API
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto dto){
-
-        // service returns JWT token
-        String token = authService.login(dto);
-
-        // return JSON with token
-        return ResponseEntity.ok(
-                Map.of("token", token)
-        );
-    }
-
-	public AuthController(AuthService authService) {
+    public AuthController(AuthService authService) {
 		this.authService = authService;
 	}
 
+	// 🔹 LOGIN API (UPDATED)
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDto dto){
+
+        // service already returns token + name
+        return ResponseEntity.ok(authService.login(dto));
+    }
 }

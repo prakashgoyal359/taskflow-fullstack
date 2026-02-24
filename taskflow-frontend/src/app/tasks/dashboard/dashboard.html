@@ -1,30 +1,75 @@
 <app-navbar></app-navbar>
-<div class="container mt-4">
-  <!-- HEADER -->
-  <div class="flex justify-between mb-3">
-    <h2 class="text-xl font-bold">My Tasks</h2>
+
+<div class="p-4 bg-gray-100 min-h-screen">
+  <!-- TOP CARDS -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white p-3 rounded shadow border-l-4 border-blue-500">
+      <p>Total Tasks</p>
+      <h2 class="text-2xl font-bold">{{ tasks.length }}</h2>
+    </div>
+
+    <div class="bg-white p-3 rounded shadow border-l-4 border-blue-500">
+      <p>To-Do</p>
+      <h2 class="text-2xl font-bold">{{ getCount('TODO') }}</h2>
+    </div>
+
+    <div class="bg-white p-3 rounded shadow border-l-4 border-orange-500">
+      <p>In Progress</p>
+      <h2 class="text-2xl font-bold">{{ getCount('IN_PROGRESS') }}</h2>
+    </div>
+
+    <div class="bg-white p-3 rounded shadow border-l-4 border-green-500">
+      <p>Done</p>
+      <h2 class="text-2xl font-bold">{{ getCount('DONE') }}</h2>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="flex justify-between items-center mb-3">
+    <div class="flex gap-2">
+      <button class="btn btn-light" (click)="filterTasks('ALL')">All Tasks</button>
+      <button class="btn btn-light" (click)="filterTasks('TODO')">To-Do</button>
+      <button class="btn btn-light" (click)="filterTasks('IN_PROGRESS')">In Progress</button>
+      <button class="btn btn-light" (click)="filterTasks('DONE')">Done</button>
+    </div>
+
     <button class="btn btn-primary" (click)="openForm()">+ New Task</button>
   </div>
 
   <!-- TASK GRID -->
-  <div class="row">
-    <div class="col-12 col-md-6 col-lg-4 mb-3" *ngFor="let t of tasks">
-      <div class="card p-3 shadow-sm h-100">
-        <h5 class="font-bold">{{ t.title }}</h5>
-        <p>{{ t.description }}</p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div
+      *ngFor="let t of filteredTasks"
+      class="bg-white p-3 rounded shadow border-t-4"
+      [ngClass]="{
+        'border-blue-500': t.status === 'TODO',
+        'border-orange-500': t.status === 'IN_PROGRESS',
+        'border-green-500': t.status === 'DONE',
+      }"
+    >
+      <h5 class="font-bold">{{ t.title }}</h5>
+      <p class="text-sm text-gray-600">{{ t.description }}</p>
 
-        <span class="badge bg-secondary mb-2">{{ t.status }}</span>
-        <p class="text-sm text-gray-500">Due: {{ t.dueDate }}</p>
+      <span
+        class="text-xs px-2 py-1 rounded mt-1 inline-block"
+        [ngClass]="{
+          'bg-blue-100 text-blue-600': t.status === 'TODO',
+          'bg-orange-100 text-orange-600': t.status === 'IN_PROGRESS',
+          'bg-green-100 text-green-600': t.status === 'DONE',
+        }"
+      >
+        {{ t.status }}
+      </span>
 
-        <div class="flex justify-between mt-auto">
-          <button class="btn btn-warning btn-sm" (click)="editTask(t)">Edit</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteTask(t.id)">Delete</button>
-        </div>
+      <p class="text-xs mt-1">Due: {{ t.dueDate }}</p>
+
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-sm btn-primary" (click)="editTask(t)">Edit</button>
+        <button class="btn btn-sm btn-danger" (click)="deleteTask(t.id)">Delete</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TASK FORM MODAL -->
 <app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
 </app-task-form>

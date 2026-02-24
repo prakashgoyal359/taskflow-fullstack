@@ -1,17 +1,11 @@
 package com.infy.authSystem.controller;
 
 import java.util.List;
+import java.util.Map;
 
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.infy.authSystem.entity.Task;
 import com.infy.authSystem.service.TaskService;
@@ -21,38 +15,55 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")   // allow Angular
 public class TaskController {
 
-    private final TaskService taskService;
-
     public TaskController(TaskService taskService) {
-		super();
 		this.taskService = taskService;
 	}
 
-	@GetMapping
-    public List<Task> getTasks(Authentication auth){
-        return taskService.getTasks(auth.getName());
+	private final TaskService taskService;
+
+    // 🔹 GET ALL TASKS
+    @GetMapping
+    public ResponseEntity<List<Task>> getTasks(Authentication auth){
+        List<Task> tasks = taskService.getTasks(auth.getName());
+        return ResponseEntity.ok(tasks);
     }
 
+    // 🔹 CREATE TASK
     @PostMapping
-    public Task createTask(@RequestBody Task task, Authentication auth){
-        return taskService.createTask(task, auth.getName());
+    public ResponseEntity<Task> createTask(@RequestBody Task task, Authentication auth){
+        Task created = taskService.createTask(task, auth.getName());
+        return ResponseEntity.ok(created);
     }
-    
+
+    // 🔹 UPDATE TASK
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id,
-                           @RequestBody Task task,
-                           Authentication authentication) {
+    public ResponseEntity<?> updateTask(@PathVariable Long id,
+                                        @RequestBody Task task,
+                                        Authentication auth) {
 
-        return taskService.updateTask(id, task, authentication.getName());
+        Task updated = taskService.updateTask(id, task, auth.getName());
+
+        return ResponseEntity.ok(
+            Map.of(
+                "message", "Task updated successfully",
+                "task", updated
+            )
+        );
     }
-    
-    @DeleteMapping("/{id}")
-    public String deleteTask(@PathVariable Long id,
-                             Authentication authentication) {
 
-        taskService.deleteTask(id, authentication.getName());
-        return "Task deleted successfully";
+    // 🔹 DELETE TASK (IMPORTANT FIX)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTask(@PathVariable Long id,
+                                        Authentication auth) {
+
+        taskService.deleteTask(id, auth.getName());
+
+        // ✅ return JSON instead of plain text
+        return ResponseEntity.ok(
+            Map.of("message", "Task deleted successfully")
+        );
     }
 }

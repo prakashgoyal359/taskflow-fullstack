@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -10,15 +10,16 @@ import { CommonModule } from '@angular/common';
   templateUrl: './navbar.html',
 })
 export class Navbar {
-  isOpen = false;
+  userName = 'User';
 
   constructor(
     private auth: AuthService,
     private router: Router,
   ) {}
 
-  toggleMenu() {
-    this.isOpen = !this.isOpen;
+  ngOnInit() {
+    const name = localStorage.getItem('name');
+    if (name) this.userName = name;
   }
 
   logout() {

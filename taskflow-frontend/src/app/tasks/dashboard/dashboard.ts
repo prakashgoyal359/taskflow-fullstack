@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Task } from '../../services/task';
 import { TaskForm } from '../task-form/task-form';
 import { Navbar } from '../../shared/navbar/navbar';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,45 +13,66 @@ import { Navbar } from '../../shared/navbar/navbar';
 })
 export class Dashboard implements OnInit {
   tasks: any[] = [];
+  filteredTasks: any[] = [];
 
   showForm = false;
   selectedTask: any = null;
 
-  constructor(private taskService: Task) {}
+  activeTab = 'ALL';
+
+  constructor(
+    private taskService: Task,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
     this.loadTasks();
   }
 
-  // LOAD TASKS
+  loading = false;
+
   loadTasks() {
     this.taskService.getTasks().subscribe((res: any) => {
       this.tasks = res;
+      this.filterTasks(this.activeTab);
+      this.cdr.detectChanges();
     });
   }
 
-  // OPEN CREATE FORM
+  filterTasks(status: string) {
+    this.activeTab = status;
+
+    if (status === 'ALL') {
+      this.filteredTasks = [...this.tasks]; // 🔥 important copy
+    } else {
+      this.filteredTasks = this.tasks.filter((t) => t.status === status);
+    }
+  }
+
+  getCount(status: string) {
+    return this.tasks.filter((t) => t.status === status).length;
+  }
+
   openForm() {
     this.selectedTask = null;
     this.showForm = true;
   }
 
-  // EDIT TASK
-  editTask(task: any) {
-    this.selectedTask = task;
+  editTask(t: any) {
+    this.selectedTask = t;
     this.showForm = true;
   }
 
-  // CLOSE FORM
   closeForm() {
     this.showForm = false;
   }
 
-  // DELETE TASK
   deleteTask(id: number) {
-    this.taskService.deleteTask(id).subscribe(() => {
-      // remove from UI instantly
-      this.tasks = this.tasks.filter((t) => t.id !== id);
+    this.taskService.deleteTask(id).subscribe({
+      next: () => {
+        this.loadTasks(); // 🔥 reload from DB
+      },
+      error: (err) => console.error(err),
     });
   }
 }

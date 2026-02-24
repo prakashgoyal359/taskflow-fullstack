@@ -48,16 +48,13 @@ export class Login {
 
   // LOGIN FUNCTION
   login() {
-    // run validations
     this.validateEmail();
     this.validatePassword();
 
-    // stop if any error
     if (this.emailError || this.passwordError) {
       return;
     }
 
-    // API call
     this.auth
       .login({
         email: this.email,
@@ -65,9 +62,16 @@ export class Login {
       })
       .subscribe({
         next: (res: any) => {
+          // 🔐 Save JWT token
           this.auth.saveToken(res.token);
+
+          // 🧑 Save user name for navbar
+          localStorage.setItem('name', res.name || 'User');
+
+          // 🔁 Redirect to dashboard
           this.router.navigate(['/dashboard']);
         },
+
         error: () => {
           alert('Invalid email or password');
         },

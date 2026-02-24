@@ -1,5 +1,7 @@
 package com.infy.authSystem.service;
 
+import java.util.Map;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,13 @@ public class AuthService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    public AuthService(UserRepository userRepo, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+		this.userRepo = userRepo;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtUtil = jwtUtil;
+	}
+
+	private final JwtUtil jwtUtil;
 
     // 🔹 REGISTER USER
     public String register(RegisterDto dto) {
@@ -41,8 +49,8 @@ public class AuthService {
         return "User Registered Successfully";
     }
 
-    // 🔹 LOGIN USER
-    public String login(LoginDto dto) {
+    // 🔹 LOGIN USER (UPDATED)
+    public Map<String, String> login(LoginDto dto) {
 
         // find user by email
         User user = userRepo.findByEmail(dto.getEmail())
@@ -56,12 +64,10 @@ public class AuthService {
         // generate JWT token
         String token = jwtUtil.generateToken(user.getEmail());
 
-        return token;
+        // return BOTH token + name
+        return Map.of(
+                "token", token,
+                "name", user.getFullName()
+        );
     }
-
-	public AuthService(UserRepository userRepo, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
-		this.userRepo = userRepo;
-		this.passwordEncoder = passwordEncoder;
-		this.jwtUtil = jwtUtil;
-	}
 }
