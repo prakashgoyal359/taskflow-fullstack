@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Task } from '../../services/task';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './task-form.html',
 })
 export class TaskForm {
@@ -21,6 +22,11 @@ export class TaskForm {
     status: 'TODO',
   };
 
+  // 🔴 validation flags
+  titleError = false;
+  descError = false;
+  dateError = false;
+
   constructor(private taskService: Task) {}
 
   ngOnInit() {
@@ -29,19 +35,45 @@ export class TaskForm {
     }
   }
 
+  // 🔐 validate required fields
+  validateForm() {
+    this.titleError = !this.form.title;
+    this.descError = !this.form.description;
+    this.dateError = !this.form.dueDate;
+
+    return !(this.titleError || this.descError || this.dateError);
+  }
+
+  // 💾 SAVE / UPDATE
   save() {
+    if (!this.validateForm()) return;
+
     if (this.task) {
-      // UPDATE
+      // 🔁 UPDATE
       this.taskService.updateTask(this.task.id, this.form).subscribe(() => {
         this.refresh.emit();
         this.close.emit();
       });
     } else {
-      // CREATE
+      // ➕ CREATE
       this.taskService.createTask(this.form).subscribe(() => {
         this.refresh.emit();
         this.close.emit();
       });
     }
+  }
+
+  // 🔴 DELETE (Danger Zone)
+  confirmDelete() {
+    const confirmBox = confirm(
+      '⚠ Are you sure you want to delete this task? This action cannot be undone.',
+    );
+
+    if (!confirmBox) return;
+
+    this.taskService.deleteTask(this.task.id).subscribe(() => {
+      this.refresh.emit();
+      this.close.emit();
+    });
   }
 }

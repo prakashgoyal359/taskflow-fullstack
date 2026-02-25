@@ -1,39 +1,96 @@
-<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center px-3">
-  <div class="bg-white rounded-xl shadow-lg p-4 w-full max-w-md">
-    <h3 class="text-lg font-bold mb-3">
+<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center px-3 z-50">
+
+  <div class="bg-white rounded-xl shadow-lg p-5 w-full max-w-md">
+
+    <!-- 🔷 HEADER -->
+    <h3 class="text-lg font-bold mb-4">
       {{ task ? 'Edit Task' : 'Create Task' }}
     </h3>
 
-    <!-- TITLE -->
+    <!-- 🔷 TITLE -->
+    <label class="block font-medium mb-1">Title</label>
     <input
-      class="form-control mb-2"
+      class="w-full border rounded p-2"
       [(ngModel)]="form.title"
       name="title"
-      placeholder="Task Title"
+      placeholder="Enter task title"
     />
+    <p *ngIf="titleError" class="text-red-500 text-xs mt-1">
+      This field is required
+    </p>
 
-    <!-- DESCRIPTION -->
-    <input
-      class="form-control mb-2"
+    <!-- 🔷 DESCRIPTION -->
+    <label class="block font-medium mt-3 mb-1">Description</label>
+    <textarea
+      class="w-full border rounded p-2"
       [(ngModel)]="form.description"
       name="description"
-      placeholder="Description"
+      placeholder="Enter description"
+    ></textarea>
+    <p *ngIf="descError" class="text-red-500 text-xs mt-1">
+      This field is required
+    </p>
+
+    <!-- 🔷 DUE DATE -->
+    <label class="block font-medium mt-3 mb-1">Due Date</label>
+    <input
+      type="date"
+      class="w-full border rounded p-2"
+      [(ngModel)]="form.dueDate"
+      name="dueDate"
     />
+    <p *ngIf="dateError" class="text-red-500 text-xs mt-1">
+      This field is required
+    </p>
 
-    <!-- DATE -->
-    <input type="date" class="form-control mb-2" [(ngModel)]="form.dueDate" name="dueDate" />
-
-    <!-- STATUS -->
-    <select class="form-control mb-3" [(ngModel)]="form.status" name="status">
-      <option value="TODO">TODO</option>
-      <option value="IN_PROGRESS">IN_PROGRESS</option>
-      <option value="DONE">DONE</option>
+    <!-- 🔷 STATUS -->
+    <label class="block font-medium mt-3 mb-1">Status</label>
+    <select
+      class="w-full border rounded p-2"
+      [(ngModel)]="form.status"
+      name="status"
+    >
+      <option value="TODO">To-Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="DONE">Done</option>
     </select>
 
-    <!-- BUTTONS -->
-    <div class="flex justify-end gap-2">
-      <button class="btn btn-success" (click)="save()">Save</button>
-      <button class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+    <!-- 🔴 DANGER ZONE (Only for edit mode) -->
+    <div *ngIf="task" class="mt-6 border-t pt-4">
+
+      <p class="text-red-500 font-semibold mb-2">⚠ Danger Zone</p>
+
+      <p class="text-xs text-gray-500 mb-2">
+        Deleting this task is permanent and cannot be undone.
+      </p>
+
+      <button
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        (click)="confirmDelete()"
+      >
+        Delete Task
+      </button>
+
     </div>
+
+    <!-- 🔷 ACTION BUTTONS -->
+    <div class="flex justify-end gap-2 mt-5">
+
+      <button
+        class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        (click)="close.emit()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        (click)="save()"
+      >
+        {{ task ? 'Update' : 'Create' }}
+      </button>
+
+    </div>
+
   </div>
 </div>

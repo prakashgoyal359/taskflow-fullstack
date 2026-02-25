@@ -68,9 +68,16 @@ export class Dashboard implements OnInit {
   }
 
   deleteTask(id: number) {
+    // 🔴 confirmation popup
+    const confirmDelete = confirm('Are you sure you want to delete this task?');
+
+    // ❌ if user cancels
+    if (!confirmDelete) return;
+
+    // ✅ if user confirms
     this.taskService.deleteTask(id).subscribe({
       next: () => {
-        this.loadTasks(); // 🔥 reload from DB
+        this.loadTasks(); // reload tasks
       },
       error: (err) => console.error(err),
     });
