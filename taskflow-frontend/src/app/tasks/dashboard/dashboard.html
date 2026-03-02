@@ -24,83 +24,216 @@
     </div>
   </div>
 
-  <!-- 🔷 FILTER BAR -->
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mb-4">
-    <div class="flex flex-wrap gap-2">
-      <button class="btn btn-light" (click)="filterTasks('ALL')">All</button>
-      <button class="btn btn-light" (click)="filterTasks('TODO')">To-Do</button>
-      <button class="btn btn-light" (click)="filterTasks('IN_PROGRESS')">In Progress</button>
-      <button class="btn btn-light" (click)="filterTasks('DONE')">Done</button>
+  <!-- 🔷 TOOLBAR -->
+  <div class="flex flex-col lg:flex-row gap-4">
+    <!-- LEFT SIDE (MAIN CONTENT) -->
+    <div class="flex-1">
+      <!-- FILTER + ACTIONS -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mb-4">
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-light" (click)="filterTasks('ALL')">All</button>
+          <button class="btn btn-light" (click)="filterTasks('TODO')">To-Do</button>
+          <button class="btn btn-light" (click)="filterTasks('IN_PROGRESS')">In Progress</button>
+          <button class="btn btn-light" (click)="filterTasks('DONE')">Done</button>
+          <button class="btn btn-light" (click)="filterTasks('ASSIGNED')">Assigned to Me</button>
+        </div>
+
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button
+            class="px-3 py-2 bg-blue-600 text-white rounded w-full sm:w-auto"
+            (click)="toggleAnalytics()"
+          >
+            {{ showAnalytics ? 'Hide Analytics' : 'Show Analytics' }}
+          </button>
+
+          <button class="btn btn-primary w-full sm:w-auto" (click)="openForm()">+ New Task</button>
+        </div>
+      </div>
+
+      <!-- 🔷 ANALYTICS PANEL -->
+      <div *ngIf="showAnalytics" class="bg-white p-4 rounded-xl shadow mb-4">
+        <h3 class="font-bold text-lg mb-3">Analytics Overview</h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+          <div class="p-3 bg-gray-50 rounded border-t-4 border-blue-500">
+            <p class="text-sm text-gray-500">Completion Rate</p>
+            <h2 class="text-xl font-bold">{{ summary?.completionRate | number: '1.0-0' }}%</h2>
+          </div>
+
+          <div class="p-3 bg-gray-50 rounded border-t-4 border-red-500">
+            <p class="text-sm text-gray-500">Overdue</p>
+            <h2 class="text-xl font-bold">{{ summary?.overdue }}</h2>
+          </div>
+
+          <div class="p-3 bg-gray-50 rounded border-t-4 border-orange-500">
+            <p class="text-sm text-gray-500">Due Today</p>
+            <h2 class="text-xl font-bold">{{ summary?.dueToday }}</h2>
+          </div>
+
+          <div class="p-3 bg-gray-50 rounded border-t-4 border-green-500">
+            <p class="text-sm text-gray-500">This Week</p>
+            <h2 class="text-xl font-bold">{{ summary?.thisWeek }}</h2>
+          </div>
+
+          <div class="p-3 bg-gray-50 rounded border-t-4 border-purple-500">
+            <p class="text-sm text-gray-500">Total</p>
+            <h2 class="text-xl font-bold">{{ summary?.totalTasks }}</h2>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 p-4 rounded">
+            <canvas id="statusChart"></canvas>
+          </div>
+
+          <div class="bg-gray-50 p-4 rounded">
+            <canvas id="priorityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔷 EMPTY STATE -->
+      <div
+        *ngIf="filteredTasks.length === 0"
+        class="flex flex-col items-center justify-center mt-16 text-gray-500 text-center"
+      >
+        <h2 class="text-xl font-semibold">You have no tasks yet.</h2>
+        <p class="text-sm mt-1">Create one to get started!</p>
+
+        <button
+          (click)="openForm()"
+          class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+        >
+          + Create Task
+        </button>
+      </div>
+
+      <!-- 🔷 TASK GRID -->
+      <div *ngIf="filteredTasks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          *ngFor="let t of filteredTasks"
+          class="bg-white p-4 rounded-xl shadow border-l-4 hover:shadow-md transition"
+          [ngClass]="{
+            'border-red-500': t.dueDate && t.dueDate < today && t.status !== 'DONE',
+            'border-orange-400': t.dueDate === today,
+            'border-blue-500': t.status === 'TODO',
+            'border-orange-500': t.status === 'IN_PROGRESS',
+            'border-green-500': t.status === 'DONE',
+          }"
+        >
+          <h5 class="font-semibold text-lg">{{ t.title }}</h5>
+          <p class="text-sm text-gray-600 mt-1">{{ t.description }}</p>
+
+          <!-- STATUS + PRIORITY -->
+          <div class="flex gap-2 mt-2">
+            <span
+              class="text-xs px-2 py-1 rounded"
+              [ngClass]="{
+                'bg-blue-100 text-blue-600': t.status === 'TODO',
+                'bg-orange-100 text-orange-600': t.status === 'IN_PROGRESS',
+                'bg-green-100 text-green-600': t.status === 'DONE',
+              }"
+            >
+              {{ t.status }}
+            </span>
+
+            <span
+              class="text-xs px-2 py-1 rounded"
+              [ngClass]="{
+                'bg-red-100 text-red-600': t.priority === 'HIGH',
+                'bg-yellow-100 text-yellow-600': t.priority === 'MEDIUM',
+                'bg-green-100 text-green-600': t.priority === 'LOW',
+              }"
+            >
+              {{ t.priority }}
+            </span>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-2">Due: {{ t.dueDate }}</p>
+
+          <!-- ASSIGNEE -->
+          <div *ngIf="t.assignee" class="mt-2 flex items-center gap-2">
+            <div
+              class="w-6 h-6 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs"
+            >
+              {{ t.assignee.fullName.charAt(0) }}
+            </div>
+            <span class="text-xs text-gray-600">{{ t.assignee.fullName }}</span>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-sm btn-secondary" (click)="viewTask(t)">Details</button>
+            <button class="btn btn-sm btn-primary" (click)="editTask(t)">Edit</button>
+            <button class="btn btn-sm btn-danger" (click)="deleteTask(t.id)">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <button class="btn btn-primary w-full sm:w-auto" (click)="openForm()">+ New Task</button>
-  </div>
+    <!-- 🔷 RIGHT SIDE ACTIVITY FEED -->
+    <div class="w-full lg:w-80">
+      <div class="bg-white rounded-xl shadow p-3 flex flex-col h-[420px]">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-semibold text-lg">Activity Feed</h3>
 
-  <!-- 🔷 EMPTY STATE -->
-  <div
-    *ngIf="filteredTasks.length === 0"
-    class="flex flex-col items-center justify-center mt-16 text-gray-500 text-center"
-  >
-    <h2 class="text-xl font-semibold">You have no tasks yet.</h2>
+          <button class="text-sm px-2 py-1 bg-blue-600 text-white rounded" (click)="loadFeed(true)">
+            Refresh
+          </button>
+        </div>
 
-    <p class="text-sm mt-1">Create one to get started!</p>
+        <!-- Loading only if empty -->
+        <div *ngIf="loadingFeed && activityFeed.length === 0" class="space-y-2">
+          <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
+          <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
+        </div>
 
-    <button
-      (click)="openForm()"
-      class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-    >
-      + Create Task
-    </button>
-  </div>
+        <!-- Empty state -->
+        <div
+          *ngIf="!loadingFeed && activityFeed.length === 0"
+          class="text-gray-400 text-center mt-10"
+        >
+          No activity yet
+        </div>
 
-  <!-- 🔷 TASK GRID (only when tasks exist) -->
-  <div
-    *ngIf="filteredTasks.length > 0"
-    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-  >
-    <div
-      *ngFor="let t of filteredTasks"
-      class="bg-white p-4 rounded-xl shadow border-t-4 transition hover:shadow-md"
-      [ngClass]="{
-        'border-blue-500': t.status === 'TODO',
-        'border-orange-500': t.status === 'IN_PROGRESS',
-        'border-green-500': t.status === 'DONE',
-      }"
-    >
-      <h5 class="font-semibold text-lg">{{ t.title }}</h5>
+        <!-- Feed List -->
+        <div class="flex-1 overflow-y-auto space-y-2 pr-1" *ngIf="activityFeed.length > 0">
+          <div *ngFor="let a of activityFeed" class="flex items-start gap-2 p-2 border-b">
+            <div
+              class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs"
+              [ngClass]="{
+                'bg-blue-500': a.actionType === 'COMMENT',
+                'bg-orange-500': a.actionType === 'STATUS',
+                'bg-purple-500': a.actionType === 'ASSIGN',
+                'bg-green-500': a.actionType === 'CREATE',
+                'bg-red-500': a.actionType === 'PRIORITY',
+                'bg-gray-400': a.actionType === 'DELETE',
+              }"
+            >
+              {{ a.actorName?.charAt(0) }}
+            </div>
 
-      <p class="text-sm text-gray-600 mt-1">
-        {{ t.description }}
-      </p>
-
-      <!-- status badge -->
-      <span
-        class="text-xs px-2 py-1 rounded mt-2 inline-block"
-        [ngClass]="{
-          'bg-blue-100 text-blue-600': t.status === 'TODO',
-          'bg-orange-100 text-orange-600': t.status === 'IN_PROGRESS',
-          'bg-green-100 text-green-600': t.status === 'DONE',
-        }"
-      >
-        {{ t.status }}
-      </span>
-
-      <p class="text-xs text-gray-500 mt-2">Due: {{ t.dueDate }}</p>
-
-      <!-- actions -->
-      <div class="flex gap-2 mt-3">
-        <button class="btn btn-sm btn-secondary" (click)="viewTask(t)">Details</button>
-        <button class="btn btn-sm btn-primary" (click)="editTask(t)">Edit</button>
-
-        <button class="btn btn-sm btn-danger" (click)="deleteTask(t.id)">Delete</button>
+            <div class="text-sm">
+              <p class="font-medium">{{ a.message }}</p>
+              <p class="text-xs text-gray-400">{{ a.createdAt | date: 'short' }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 🔷 TASK FORM MODAL -->
-<app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
-</app-task-form>
+<!-- 🔷 MODALS -->
+<app-task-form
+  *ngIf="showForm"
+  [task]="selectedTask"
+  (close)="closeForm()"
+  (refresh)="loadTasks()"
+></app-task-form>
 
-<app-task-detail *ngIf="showDetail" [task]="selectedTask" (close)="showDetail = false">
-</app-task-detail>
+<app-task-detail
+  *ngIf="showDetail"
+  [task]="selectedTask"
+  (close)="showDetail = false"
+></app-task-detail>

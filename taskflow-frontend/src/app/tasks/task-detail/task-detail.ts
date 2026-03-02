@@ -13,10 +13,13 @@ import { HttpClient } from '@angular/common/http';
 export class TaskDetail implements OnInit {
   @Input() task: any;
   @Output() close = new EventEmitter<void>();
+  @Output() activity = new EventEmitter<any>();
 
   comments: any[] = [];
   newComment = '';
   currentUser = '';
+
+  isLoadingComments = false;
 
   constructor(private http: HttpClient) {}
 
@@ -26,9 +29,17 @@ export class TaskDetail implements OnInit {
   }
 
   loadComments() {
-    this.http
-      .get(`http://localhost:8080/api/tasks/${this.task.id}/comments`)
-      .subscribe((res: any) => (this.comments = res));
+    this.isLoadingComments = true;
+
+    this.http.get(`http://localhost:8080/api/tasks/${this.task.id}/comments`).subscribe({
+      next: (res: any) => {
+        this.comments = res;
+        this.isLoadingComments = false;
+      },
+      error: () => {
+        this.isLoadingComments = false;
+      },
+    });
   }
 
   isPosting = false;
@@ -36,24 +47,50 @@ export class TaskDetail implements OnInit {
   postComment() {
     if (!this.newComment) return;
 
-    this.isPosting = true;
+    this.activity.emit({
+      actorName: localStorage.getItem('name'),
+      message: 'commented on a task',
+      actionType: 'COMMENT',
+      createdAt: new Date(),
+    });
+
+    const tempComment = {
+      body: this.newComment,
+      author: {
+        fullName: localStorage.getItem('name'),
+      },
+      createdAt: new Date(),
+    };
+
+    // 🔥 instantly show in UI
+    this.comments.push(tempComment);
 
     this.http
       .post(`http://localhost:8080/api/tasks/${this.task.id}/comments`, {
         body: this.newComment,
       })
-      .subscribe((res: any) => {
-        this.comments.push(res);
-
-        this.newComment = '';
-        this.isPosting = false;
+      .subscribe({
+        next: () => {
+          this.newComment = '';
+        },
+        error: () => {
+          alert('Failed to post comment');
+        },
       });
   }
 
   deleteComment(id: number) {
-    this.http.delete(`http://localhost:8080/api/comments/${id}`).subscribe(() => {
-      // 🔥 REMOVE COMMENT FROM UI INSTANTLY
-      this.comments = this.comments.filter((c) => c.id !== id);
+    // instant remove
+
+    this.activity.emit({
+      actorName: localStorage.getItem('name'),
+      message: 'deleted a comment',
+      actionType: 'COMMENT',
+      createdAt: new Date(),
     });
+
+    this.comments = this.comments.filter((c) => c.id !== id);
+
+    this.http.delete(`http://localhost:8080/api/comments/${id}`).subscribe();
   }
 }

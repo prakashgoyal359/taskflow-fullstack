@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.infy.authSystem.dto.TaskSummaryDto;
 import com.infy.authSystem.entity.Task;
 import com.infy.authSystem.service.TaskService;
 
@@ -65,5 +66,10 @@ public class TaskController {
         return ResponseEntity.ok(
             Map.of("message", "Task deleted successfully")
         );
+    }
+    
+    @GetMapping("/summary")
+    public ResponseEntity<TaskSummaryDto> getSummary(Authentication auth) {
+        return ResponseEntity.ok(taskService.getSummary(auth.getName()));
     }
 }

@@ -6,6 +6,8 @@ import { Navbar } from '../../shared/navbar/navbar';
 import { ChangeDetectorRef } from '@angular/core';
 import { TaskDetail } from '../task-detail/task-detail';
 
+declare var Chart: any;
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -19,7 +21,16 @@ export class Dashboard implements OnInit {
   showForm = false;
   selectedTask: any = null;
 
+  showAnalytics = false;
+  summary: any = null;
+  analyticsLoaded = false;
+
   activeTab = 'ALL';
+
+  activityFeed: any[] = [];
+  loadingFeed = false;
+
+  today = new Date().toISOString().split('T')[0];
 
   constructor(
     private taskService: Task,
@@ -28,6 +39,7 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.loadTasks();
+    this.loadFeed();
   }
 
   loading = false;
@@ -37,6 +49,88 @@ export class Dashboard implements OnInit {
       this.tasks = res;
       this.filterTasks(this.activeTab);
       this.cdr.detectChanges();
+      this.loadFeed();
+    });
+  }
+
+  toggleAnalytics() {
+    this.showAnalytics = !this.showAnalytics;
+
+    // if opening panel
+    if (this.showAnalytics) {
+      // load summary only once
+      if (!this.summaryLoaded) {
+        this.loadSummary();
+      }
+
+      // wait for DOM to render canvas
+      setTimeout(() => {
+        this.renderCharts();
+      }, 200);
+    }
+  }
+
+  summaryLoaded = false;
+
+  loadSummary() {
+    this.taskService.getSummary().subscribe((res: any) => {
+      this.summary = res;
+      this.summaryLoaded = true;
+    });
+  }
+
+  loadAnalytics() {
+    this.taskService.getSummary().subscribe((res: any) => {
+      this.summary = res;
+      this.analyticsLoaded = true;
+
+      this.renderCharts();
+
+      setTimeout(() => {
+        this.renderCharts();
+      }, 200);
+    });
+  }
+
+  statusChart: any;
+  priorityChart: any;
+
+  renderCharts() {
+    // ❌ destroy old charts first
+    if (this.statusChart) this.statusChart.destroy();
+    if (this.priorityChart) this.priorityChart.destroy();
+
+    const statusCtx = document.getElementById('statusChart') as HTMLCanvasElement;
+    const priorityCtx = document.getElementById('priorityChart') as HTMLCanvasElement;
+
+    if (!statusCtx || !priorityCtx) return;
+
+    // 🔵 STATUS CHART
+    this.statusChart = new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['To-Do', 'In Progress', 'Done'],
+        datasets: [
+          {
+            data: [this.summary.todo, this.summary.inProgress, this.summary.done],
+            backgroundColor: ['#3b82f6', '#f59e0b', '#22c55e'],
+          },
+        ],
+      },
+    });
+
+    // 🔴 PRIORITY CHART
+    this.priorityChart = new Chart(priorityCtx, {
+      type: 'bar',
+      data: {
+        labels: ['High', 'Medium', 'Low'],
+        datasets: [
+          {
+            data: [this.summary.high, this.summary.medium, this.summary.low],
+            backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'],
+          },
+        ],
+      },
     });
   }
 
@@ -89,5 +183,33 @@ export class Dashboard implements OnInit {
   viewTask(task: any) {
     this.selectedTask = task;
     this.showDetail = true;
+  }
+
+  loadFeed(forceRefresh: boolean = false) {
+    if (this.loadingFeed && !forceRefresh) return;
+
+    // 🔥 FIX: wrap in setTimeout so Angular change cycle is safe
+    setTimeout(() => {
+      this.loadingFeed = true;
+    });
+
+    this.taskService.getActivityFeed().subscribe({
+      next: (res: any) => {
+        // 🔥 assign data safely
+        this.activityFeed = res || [];
+
+        // 🔥 fix change detection error
+        setTimeout(() => {
+          this.loadingFeed = false;
+        });
+      },
+      error: (err) => {
+        console.error(err);
+
+        setTimeout(() => {
+          this.loadingFeed = false;
+        });
+      },
+    });
   }
 }

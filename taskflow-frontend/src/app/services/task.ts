@@ -30,4 +30,12 @@ export class Task {
   deleteTask(id: number) {
     return this.http.delete(`${this.API}/${id}`);
   }
+
+  getSummary() {
+    return this.http.get('http://localhost:8080/api/tasks/summary');
+  }
+
+  getActivityFeed() {
+    return this.http.get('http://localhost:8080/api/activity');
+  }
 }

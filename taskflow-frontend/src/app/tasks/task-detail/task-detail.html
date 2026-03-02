@@ -45,27 +45,39 @@
         <h3 class="font-bold mb-2">Comments</h3>
 
         <div class="flex-1 overflow-y-auto space-y-2">
-          <div *ngFor="let c of comments" class="border-b pb-2 flex gap-2">
-            <!-- avatar -->
-            <div
-              class="w-8 h-8 bg-blue-400 text-white rounded-full flex items-center justify-center text-sm"
-            >
-              {{ c.author.fullName.charAt(0) }}
+          <!-- 🔄 LOADING STATE -->
+          <div *ngIf="isLoadingComments">
+            <div class="h-10 bg-gray-200 animate-pulse rounded mb-2"></div>
+            <div class="h-10 bg-gray-200 animate-pulse rounded mb-2"></div>
+            <div class="h-10 bg-gray-200 animate-pulse rounded mb-2"></div>
+          </div>
+
+          <!-- 🗨 COMMENTS -->
+          <div *ngIf="!isLoadingComments">
+            <div *ngFor="let c of comments" class="border-b pb-2 flex gap-2">
+              <div
+                class="w-8 h-8 bg-blue-400 text-white rounded-full flex items-center justify-center text-sm"
+              >
+                {{ c.author.fullName.charAt(0) }}
+              </div>
+
+              <div class="flex-1">
+                <p class="text-sm font-semibold">{{ c.author.fullName }}</p>
+                <p class="text-xs text-gray-500">
+                  {{ c.createdAt | date: 'short' }}
+                </p>
+                <p class="text-sm mt-1">{{ c.body }}</p>
+              </div>
+
+              @if (c.author.fullName === currentUser) {
+                <button class="text-red-500 text-xs" (click)="deleteComment(c.id)">🗑</button>
+              }
             </div>
 
-            <div class="flex-1">
-              <p class="text-sm font-semibold">{{ c.author.fullName }}</p>
-              <p class="text-xs text-gray-500">
-                {{ c.createdAt | date: 'short' }}
-              </p>
-
-              <p class="text-sm mt-1">{{ c.body }}</p>
-            </div>
-
-            <!-- delete -->
-            @if (c.author.fullName === currentUser) {
-              <button class="text-red-500 text-xs" (click)="deleteComment(c.id)">🗑</button>
-            }
+            <!-- EMPTY STATE -->
+            <p *ngIf="comments.length === 0" class="text-gray-400 text-sm text-center mt-4">
+              No comments yet
+            </p>
           </div>
         </div>
 
