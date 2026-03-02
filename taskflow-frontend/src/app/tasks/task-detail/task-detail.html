@@ -63,13 +63,9 @@
             </div>
 
             <!-- delete -->
-            <button
-              *ngIf="c.author.fullName === currentUser"
-              class="text-red-500 text-xs"
-              (click)="deleteComment(c.id)"
-            >
-              🗑
-            </button>
+            @if (c.author.fullName === currentUser) {
+              <button class="text-red-500 text-xs" (click)="deleteComment(c.id)">🗑</button>
+            }
           </div>
         </div>
 

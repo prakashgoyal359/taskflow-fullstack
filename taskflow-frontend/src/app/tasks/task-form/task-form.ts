@@ -20,7 +20,12 @@ export class TaskForm {
     description: '',
     dueDate: '',
     status: 'TODO',
+    priority: 'MEDIUM',
+    assignedTo: null,
   };
+
+  users: any[] = [];
+  selectedUser: any = null;
 
   // 🔴 validation flags
   titleError = false;
@@ -30,9 +35,19 @@ export class TaskForm {
   constructor(private taskService: Task) {}
 
   ngOnInit() {
+    this.loadUsers();
+
     if (this.task) {
       this.form = { ...this.task };
+
+      this.selectedUser = this.task.assignee || null;
     }
+  }
+
+  loadUsers() {
+    this.taskService.getUsers().subscribe((res: any) => {
+      this.users = res;
+    });
   }
 
   // 🔐 validate required fields
@@ -47,6 +62,12 @@ export class TaskForm {
   // 💾 SAVE / UPDATE
   save() {
     if (!this.validateForm()) return;
+
+    this.form.assignee = this.selectedUser ? { id: this.selectedUser.id } : null;
+
+    if (!this.form.priority) {
+      this.form.priority = 'MEDIUM';
+    }
 
     if (this.task) {
       // 🔁 UPDATE

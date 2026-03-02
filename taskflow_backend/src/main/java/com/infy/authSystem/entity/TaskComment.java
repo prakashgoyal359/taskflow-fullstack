@@ -15,6 +15,7 @@ public class TaskComment {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
     public Long getId() {

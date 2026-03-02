@@ -31,22 +31,29 @@ export class TaskDetail implements OnInit {
       .subscribe((res: any) => (this.comments = res));
   }
 
+  isPosting = false;
+
   postComment() {
     if (!this.newComment) return;
+
+    this.isPosting = true;
 
     this.http
       .post(`http://localhost:8080/api/tasks/${this.task.id}/comments`, {
         body: this.newComment,
       })
-      .subscribe(() => {
+      .subscribe((res: any) => {
+        this.comments.push(res);
+
         this.newComment = '';
-        this.loadComments();
+        this.isPosting = false;
       });
   }
 
   deleteComment(id: number) {
-    this.http
-      .delete(`http://localhost:8080/api/comments/${id}`)
-      .subscribe(() => this.loadComments());
+    this.http.delete(`http://localhost:8080/api/comments/${id}`).subscribe(() => {
+      // 🔥 REMOVE COMMENT FROM UI INSTANTLY
+      this.comments = this.comments.filter((c) => c.id !== id);
+    });
   }
 }

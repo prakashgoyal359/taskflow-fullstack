@@ -18,39 +18,76 @@ public class TaskService {
     private final TaskRepository taskRepo;
     private final UserRepository userRepo;
 
-    public TaskService(TaskRepository taskRepo, UserRepository userRepo) {
-		this.taskRepo = taskRepo;
-		this.userRepo = userRepo;
-	}
-
-	public List<Task> getTasks(String email){
+    // 🔹 GET ALL TASKS OF LOGGED USER
+    public List<Task> getTasks(String email) {
         return taskRepo.findByUserEmail(email);
     }
 
-    public Task createTask(Task task, String email){
-        User user = userRepo.findByEmail(email).get();
-        task.setUser(user);
+    // 🔹 CREATE TASK (UPDATED)
+    public Task createTask(Task task, String email) {
+
+        // set owner
+        User owner = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        task.setUser(owner);
+
+        // 🔥 set PRIORITY (default MEDIUM if null)
+        if (task.getPriority() == null) {
+            task.setPriority("MEDIUM");
+        }
+
+        // 🔥 set ASSIGNEE if provided
+        if (task.getAssignee() != null && task.getAssignee().getId() != null) {
+
+            User assignee = userRepo.findById(task.getAssignee().getId())
+                    .orElseThrow(() -> new RuntimeException("Assignee not found"));
+
+            task.setAssignee(assignee);
+        } else {
+            task.setAssignee(null); // unassigned
+        }
+
         return taskRepo.save(task);
     }
-    
+
+    // 🔹 UPDATE TASK (UPDATED)
     public Task updateTask(Long id, Task updatedTask, String email) {
 
         Task existingTask = taskRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        // Check task owner
+        // 🔐 Check owner
         if (!existingTask.getUser().getEmail().equals(email)) {
             throw new RuntimeException("You are not allowed to update this task");
         }
 
+        // 🔄 update fields
         existingTask.setTitle(updatedTask.getTitle());
         existingTask.setDescription(updatedTask.getDescription());
         existingTask.setDueDate(updatedTask.getDueDate());
         existingTask.setStatus(updatedTask.getStatus());
 
+        // 🔥 update PRIORITY
+        if (updatedTask.getPriority() != null) {
+            existingTask.setPriority(updatedTask.getPriority());
+        }
+
+        // 🔥 update ASSIGNEE
+        if (updatedTask.getAssignee() != null && updatedTask.getAssignee().getId() != null) {
+
+            User assignee = userRepo.findById(updatedTask.getAssignee().getId())
+                    .orElseThrow(() -> new RuntimeException("Assignee not found"));
+
+            existingTask.setAssignee(assignee);
+        } else {
+            existingTask.setAssignee(null); // remove assignment
+        }
+
         return taskRepo.save(existingTask);
     }
-    
+
+    // 🔹 DELETE TASK
     public void deleteTask(Long id, String email) {
 
         Task existingTask = taskRepo.findById(id)
@@ -62,4 +99,10 @@ public class TaskService {
 
         taskRepo.delete(existingTask);
     }
+
+	public TaskService(TaskRepository taskRepo, UserRepository userRepo) {
+		super();
+		this.taskRepo = taskRepo;
+		this.userRepo = userRepo;
+	}
 }

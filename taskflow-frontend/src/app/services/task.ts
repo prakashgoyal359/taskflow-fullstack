@@ -12,6 +12,10 @@ export class Task {
     return this.http.get(this.API);
   }
 
+  getUsers() {
+    return this.http.get('http://localhost:8080/api/users');
+  }
+
   // CREATE TASK
   createTask(data: any) {
     return this.http.post(this.API, data);

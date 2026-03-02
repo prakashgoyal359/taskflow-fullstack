@@ -1,12 +1,16 @@
 package com.infy.authSystem.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +27,31 @@ public class Task {
 	private String description;
 	private LocalDate dueDate;
 	private String status;
+	
+	@ManyToOne
+	@JoinColumn(name = "assigned_to")
+	private User assignee;
+	
+	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TaskComment> comments;
+
+	public User getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(User assignee) {
+		this.assignee = assignee;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+	private String priority; // HIGH / MEDIUM / LOW
 
 	@ManyToOne
 	private User user;
