@@ -136,14 +136,24 @@ export class Dashboard implements OnInit {
   }
 
   filterTasks(status: string) {
-    this.activeTab = status;
+  this.activeTab = status;
 
-    if (status === 'ALL') {
-      this.filteredTasks = [...this.tasks]; // 🔥 important copy
-    } else {
-      this.filteredTasks = this.tasks.filter((t) => t.status === status);
-    }
+  const currentUser = localStorage.getItem('name');
+
+  if (status === 'ALL') {
+    this.filteredTasks = [...this.tasks];
+
+  } else if (status === 'ASSIGNED') {
+    this.filteredTasks = this.tasks.filter(
+      (t) => t.assignee && t.assignee.fullName === currentUser
+    );
+
+  } else {
+    this.filteredTasks = this.tasks.filter(
+      (t) => t.status === status
+    );
   }
+}
 
   getCount(status: string) {
     return this.tasks.filter((t) => t.status === status).length;
