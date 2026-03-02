@@ -26,9 +26,9 @@
 
   <!-- 🔷 TOOLBAR -->
   <div class="flex flex-col lg:flex-row gap-4">
-    <!-- LEFT SIDE (MAIN CONTENT) -->
+    <!-- 🔹 LEFT SIDE -->
     <div class="flex-1">
-      <!-- FILTER + ACTIONS -->
+      <!-- FILTER BAR -->
       <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mb-4">
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-light" (click)="filterTasks('ALL')">All</button>
@@ -57,27 +57,27 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div class="p-3 bg-gray-50 rounded border-t-4 border-blue-500">
             <p class="text-sm text-gray-500">Completion Rate</p>
-            <h2 class="text-xl font-bold">{{ summary?.completionRate | number: '1.0-0' }}%</h2>
+            <h2 class="text-xl font-bold">{{ summary?.completionRate || 0 }}%</h2>
           </div>
 
           <div class="p-3 bg-gray-50 rounded border-t-4 border-red-500">
             <p class="text-sm text-gray-500">Overdue</p>
-            <h2 class="text-xl font-bold">{{ summary?.overdue }}</h2>
+            <h2 class="text-xl font-bold">{{ summary?.overdue || 0 }}</h2>
           </div>
 
           <div class="p-3 bg-gray-50 rounded border-t-4 border-orange-500">
             <p class="text-sm text-gray-500">Due Today</p>
-            <h2 class="text-xl font-bold">{{ summary?.dueToday }}</h2>
+            <h2 class="text-xl font-bold">{{ summary?.dueToday || 0 }}</h2>
           </div>
 
           <div class="p-3 bg-gray-50 rounded border-t-4 border-green-500">
             <p class="text-sm text-gray-500">This Week</p>
-            <h2 class="text-xl font-bold">{{ summary?.thisWeek }}</h2>
+            <h2 class="text-xl font-bold">{{ summary?.thisWeek || 0 }}</h2>
           </div>
 
           <div class="p-3 bg-gray-50 rounded border-t-4 border-purple-500">
             <p class="text-sm text-gray-500">Total</p>
-            <h2 class="text-xl font-bold">{{ summary?.totalTasks }}</h2>
+            <h2 class="text-xl font-bold">{{ summary?.totalTasks || 0 }}</h2>
           </div>
         </div>
 
@@ -112,16 +112,22 @@
       <div *ngIf="filteredTasks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div
           *ngFor="let t of filteredTasks"
-          class="bg-white p-4 rounded-xl shadow border-l-4 hover:shadow-md transition"
+          class="bg-white p-4 rounded-xl shadow border-l-4 transition hover:shadow-md"
           [ngClass]="{
-            'border-red-500': t.dueDate && t.dueDate < today && t.status !== 'DONE',
-            'border-orange-400': t.dueDate === today,
-            'border-blue-500': t.status === 'TODO',
-            'border-orange-500': t.status === 'IN_PROGRESS',
-            'border-green-500': t.status === 'DONE',
+            'border-red-500': (t | taskDueDate) === 'overdue',
+            'border-amber-500': (t | taskDueDate) === 'today',
+            'border-green-500': (t | taskDueDate) === 'done',
+            'border-gray-200': (t | taskDueDate) === 'upcoming',
           }"
         >
-          <h5 class="font-semibold text-lg">{{ t.title }}</h5>
+          <!-- TITLE -->
+          <h5
+            class="font-semibold text-lg"
+            [ngClass]="{ 'text-red-600': (t | taskDueDate) === 'overdue' }"
+          >
+            {{ t.title }}
+          </h5>
+
           <p class="text-sm text-gray-600 mt-1">{{ t.description }}</p>
 
           <!-- STATUS + PRIORITY -->
@@ -149,7 +155,24 @@
             </span>
           </div>
 
-          <p class="text-xs text-gray-500 mt-2">Due: {{ t.dueDate }}</p>
+          <!-- 🔔 DUE DATE ALERT -->
+          <div class="mt-2 text-xs font-semibold">
+            <span *ngIf="(t | taskDueDate) === 'overdue'" class="text-red-600">
+              Overdue — {{ t.dueDate | date: 'MMM dd' }}
+            </span>
+
+            <span *ngIf="(t | taskDueDate) === 'today'" class="text-amber-600">
+              Due Today — {{ t.dueDate | date: 'MMM dd' }}
+            </span>
+
+            <span *ngIf="(t | taskDueDate) === 'done'" class="text-gray-400">
+              Completed — {{ t.dueDate | date: 'MMM dd' }}
+            </span>
+
+            <span *ngIf="(t | taskDueDate) === 'upcoming'" class="text-gray-500">
+              Due: {{ t.dueDate | date: 'MMM dd' }}
+            </span>
+          </div>
 
           <!-- ASSIGNEE -->
           <div *ngIf="t.assignee" class="mt-2 flex items-center gap-2">
@@ -182,13 +205,11 @@
           </button>
         </div>
 
-        <!-- Loading only if empty -->
         <div *ngIf="loadingFeed && activityFeed.length === 0" class="space-y-2">
           <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
           <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
         </div>
 
-        <!-- Empty state -->
         <div
           *ngIf="!loadingFeed && activityFeed.length === 0"
           class="text-gray-400 text-center mt-10"
@@ -196,7 +217,6 @@
           No activity yet
         </div>
 
-        <!-- Feed List -->
         <div class="flex-1 overflow-y-auto space-y-2 pr-1" *ngIf="activityFeed.length > 0">
           <div *ngFor="let a of activityFeed" class="flex items-start gap-2 p-2 border-b">
             <div
@@ -225,15 +245,8 @@
 </div>
 
 <!-- 🔷 MODALS -->
-<app-task-form
-  *ngIf="showForm"
-  [task]="selectedTask"
-  (close)="closeForm()"
-  (refresh)="loadTasks()"
-></app-task-form>
+<app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
+</app-task-form>
 
-<app-task-detail
-  *ngIf="showDetail"
-  [task]="selectedTask"
-  (close)="showDetail = false"
-></app-task-detail>
+<app-task-detail *ngIf="showDetail" [task]="selectedTask" (close)="showDetail = false">
+</app-task-detail>

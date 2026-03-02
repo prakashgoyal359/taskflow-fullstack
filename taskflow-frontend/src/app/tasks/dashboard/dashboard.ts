@@ -5,13 +5,14 @@ import { TaskForm } from '../task-form/task-form';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ChangeDetectorRef } from '@angular/core';
 import { TaskDetail } from '../task-detail/task-detail';
+import { TaskDueDatePipe } from '../../pipes/task-due-date/task-due-date';
 
 declare var Chart: any;
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TaskForm, Navbar, TaskDetail],
+  imports: [CommonModule, TaskForm, Navbar, TaskDetail, TaskDueDatePipe],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
