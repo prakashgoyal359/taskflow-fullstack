@@ -4,11 +4,12 @@ import { Task } from '../../services/task';
 import { TaskForm } from '../task-form/task-form';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ChangeDetectorRef } from '@angular/core';
+import { TaskDetail } from '../task-detail/task-detail';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TaskForm, Navbar],
+  imports: [CommonModule, TaskForm, Navbar, TaskDetail],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -81,5 +82,12 @@ export class Dashboard implements OnInit {
       },
       error: (err) => console.error(err),
     });
+  }
+
+  showDetail = false;
+
+  viewTask(task: any) {
+    this.selectedTask = task;
+    this.showDetail = true;
   }
 }

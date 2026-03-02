@@ -89,6 +89,7 @@
 
       <!-- actions -->
       <div class="flex gap-2 mt-3">
+        <button class="btn btn-sm btn-secondary" (click)="viewTask(t)">Details</button>
         <button class="btn btn-sm btn-primary" (click)="editTask(t)">Edit</button>
 
         <button class="btn btn-sm btn-danger" (click)="deleteTask(t.id)">Delete</button>
@@ -100,3 +101,6 @@
 <!-- 🔷 TASK FORM MODAL -->
 <app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
 </app-task-form>
+
+<app-task-detail *ngIf="showDetail" [task]="selectedTask" (close)="showDetail = false">
+</app-task-detail>
