@@ -49,6 +49,7 @@ export class Dashboard implements OnInit {
     this.taskService.getTasks().subscribe((res: any) => {
       this.tasks = res;
       this.filterTasks(this.activeTab);
+      this.sortByPriority();
       this.cdr.detectChanges();
       this.loadFeed();
     });
@@ -136,24 +137,20 @@ export class Dashboard implements OnInit {
   }
 
   filterTasks(status: string) {
-  this.activeTab = status;
+    this.activeTab = status;
 
-  const currentUser = localStorage.getItem('name');
+    const currentUser = localStorage.getItem('name');
 
-  if (status === 'ALL') {
-    this.filteredTasks = [...this.tasks];
-
-  } else if (status === 'ASSIGNED') {
-    this.filteredTasks = this.tasks.filter(
-      (t) => t.assignee && t.assignee.fullName === currentUser
-    );
-
-  } else {
-    this.filteredTasks = this.tasks.filter(
-      (t) => t.status === status
-    );
+    if (status === 'ALL') {
+      this.filteredTasks = [...this.tasks];
+    } else if (status === 'ASSIGNED') {
+      this.filteredTasks = this.tasks.filter(
+        (t) => t.assignee && t.assignee.fullName === currentUser,
+      );
+    } else {
+      this.filteredTasks = this.tasks.filter((t) => t.status === status);
+    }
   }
-}
 
   getCount(status: string) {
     return this.tasks.filter((t) => t.status === status).length;
@@ -221,6 +218,30 @@ export class Dashboard implements OnInit {
           this.loadingFeed = false;
         });
       },
+    });
+  }
+
+  sortByPriority() {
+    const priorityOrder: any = {
+      HIGH: 1,
+      MEDIUM: 2,
+      LOW: 3,
+    };
+
+    this.filteredTasks.sort((a: any, b: any) => {
+      // 1️⃣ sort by priority
+      const p1 = priorityOrder[a.priority] || 4;
+      const p2 = priorityOrder[b.priority] || 4;
+
+      if (p1 !== p2) {
+        return p1 - p2;
+      }
+
+      // 2️⃣ secondary sort by due date (earliest first)
+      const d1 = new Date(a.dueDate).getTime();
+      const d2 = new Date(b.dueDate).getTime();
+
+      return d1 - d2;
     });
   }
 }

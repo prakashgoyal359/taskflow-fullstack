@@ -40,6 +40,12 @@
 
         <div class="flex gap-2 w-full sm:w-auto">
           <button
+            class="px-3 py-2 bg-purple-600 text-white rounded w-full sm:w-auto"
+            (click)="sortByPriority()"
+          >
+            Sort: Priority
+          </button>
+          <button
             class="px-3 py-2 bg-blue-600 text-white rounded w-full sm:w-auto"
             (click)="toggleAnalytics()"
           >
@@ -114,10 +120,9 @@
           *ngFor="let t of filteredTasks"
           class="bg-white p-4 rounded-xl shadow border-l-4 transition hover:shadow-md"
           [ngClass]="{
-            'border-red-500': (t | taskDueDate) === 'overdue',
-            'border-amber-500': (t | taskDueDate) === 'today',
-            'border-green-500': (t | taskDueDate) === 'done',
-            'border-gray-200': (t | taskDueDate) === 'upcoming',
+            'border-red-500': t.priority === 'HIGH',
+            'border-amber-500': t.priority === 'MEDIUM',
+            'border-green-500': t.priority === 'LOW',
           }"
         >
           <!-- TITLE -->
@@ -144,11 +149,11 @@
             </span>
 
             <span
-              class="text-xs px-2 py-1 rounded"
+              class="text-xs px-2 py-1 rounded font-semibold"
               [ngClass]="{
-                'bg-red-100 text-red-600': t.priority === 'HIGH',
-                'bg-yellow-100 text-yellow-600': t.priority === 'MEDIUM',
-                'bg-green-100 text-green-600': t.priority === 'LOW',
+                'bg-red-100 text-red-700': t.priority === 'HIGH',
+                'bg-amber-100 text-amber-700': t.priority === 'MEDIUM',
+                'bg-green-100 text-green-700': t.priority === 'LOW',
               }"
             >
               {{ t.priority }}
