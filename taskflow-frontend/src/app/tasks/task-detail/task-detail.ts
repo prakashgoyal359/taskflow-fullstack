@@ -44,19 +44,16 @@ export class TaskDetail implements OnInit {
   postComment() {
     if (!this.newComment) return;
 
-    const tempComment = {
-      body: this.newComment,
-      author: { fullName: this.currentUser },
-      createdAt: new Date(),
-    };
+    const body = this.newComment;
 
-    // instant UI update
-    this.comments.push(tempComment);
+    this.commentService.addComment(this.task.id, body).subscribe({
+      next: (savedComment: any) => {
+        // add REAL comment with id
+        this.comments.push(savedComment);
 
-    this.commentService.addComment(this.task.id, this.newComment).subscribe({
-      next: () => {
         this.newComment = '';
       },
+
       error: () => {
         alert('Failed to post comment');
       },
@@ -64,16 +61,16 @@ export class TaskDetail implements OnInit {
   }
 
   deleteComment(id: number) {
+    if (!id) return;
+
     const original = [...this.comments];
 
-    // remove instantly
     this.comments = this.comments.filter((c) => c.id !== id);
 
     this.commentService.deleteComment(id).subscribe({
       next: () => {},
 
       error: (err) => {
-        // restore if forbidden
         if (err.status === 403) {
           alert("You cannot delete another user's comment.");
 
