@@ -17,19 +17,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TaskService {
 
-    private final ActivityService activityService;
-    private final TaskRepository taskRepo;
-    private final UserRepository userRepo;
-
     public TaskService(ActivityService activityService, TaskRepository taskRepo, UserRepository userRepo) {
 		this.activityService = activityService;
 		this.taskRepo = taskRepo;
 		this.userRepo = userRepo;
 	}
 
-	// 🔹 GET ALL TASKS
-    public List<Task> getTasks(String email) {
-        return taskRepo.findByUserEmail(email);
+	private final ActivityService activityService;
+    private final TaskRepository taskRepo;
+    private final UserRepository userRepo;
+
+    // 🔹 GET ALL TASKS (GLOBAL)
+    public List<Task> getTasks() {
+        return taskRepo.findAll();
     }
 
     // 🔹 CREATE TASK
@@ -40,12 +40,10 @@ public class TaskService {
 
         task.setUser(owner);
 
-        // default priority
         if (task.getPriority() == null) {
             task.setPriority("MEDIUM");
         }
 
-        // assignee
         if (task.getAssignee() != null && task.getAssignee().getId() != null) {
             User assignee = userRepo.findById(task.getAssignee().getId())
                     .orElseThrow(() -> new RuntimeException("Assignee not found"));
@@ -54,10 +52,8 @@ public class TaskService {
             task.setAssignee(null);
         }
 
-        // ✅ SAVE FIRST
         Task savedTask = taskRepo.save(task);
 
-        // ✅ LOG AFTER SAVE
         activityService.log(
                 "CREATE",
                 owner.getFullName() + " created task " + savedTask.getTitle(),
@@ -68,7 +64,7 @@ public class TaskService {
         return savedTask;
     }
 
-    // 🔹 UPDATE TASK
+    // 🔹 UPDATE TASK (GLOBAL)
     public Task updateTask(Long id, Task updatedTask, String email) {
 
         Task existingTask = taskRepo.findById(id)
@@ -77,26 +73,18 @@ public class TaskService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!existingTask.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("You are not allowed to update this task");
-        }
-
-        // 🔁 check changes BEFORE updating
         String oldStatus = existingTask.getStatus();
         String oldPriority = existingTask.getPriority();
 
-        // update fields
         existingTask.setTitle(updatedTask.getTitle());
         existingTask.setDescription(updatedTask.getDescription());
         existingTask.setDueDate(updatedTask.getDueDate());
         existingTask.setStatus(updatedTask.getStatus());
 
-        // priority
         if (updatedTask.getPriority() != null) {
             existingTask.setPriority(updatedTask.getPriority());
         }
 
-        // assignee
         if (updatedTask.getAssignee() != null && updatedTask.getAssignee().getId() != null) {
             User assignee = userRepo.findById(updatedTask.getAssignee().getId())
                     .orElseThrow(() -> new RuntimeException("Assignee not found"));
@@ -105,10 +93,8 @@ public class TaskService {
             existingTask.setAssignee(null);
         }
 
-        // ✅ SAVE FIRST
         Task saved = taskRepo.save(existingTask);
 
-        // 🔥 STATUS CHANGE LOG
         if (!oldStatus.equals(updatedTask.getStatus())) {
             activityService.log(
                     "STATUS",
@@ -118,7 +104,6 @@ public class TaskService {
             );
         }
 
-        // 🔥 PRIORITY CHANGE LOG
         if (updatedTask.getPriority() != null && !oldPriority.equals(updatedTask.getPriority())) {
             activityService.log(
                     "PRIORITY",
@@ -131,7 +116,7 @@ public class TaskService {
         return saved;
     }
 
-    // 🔹 DELETE TASK
+    // 🔹 DELETE TASK (GLOBAL)
     public void deleteTask(Long id, String email) {
 
         Task existingTask = taskRepo.findById(id)
@@ -140,11 +125,6 @@ public class TaskService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!existingTask.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("You are not allowed to delete this task");
-        }
-
-        // log before delete
         activityService.log(
                 "DELETE",
                 user.getFullName() + " deleted task " + existingTask.getTitle(),
@@ -155,10 +135,10 @@ public class TaskService {
         taskRepo.delete(existingTask);
     }
 
-    // 🔹 ANALYTICS SUMMARY
-    public TaskSummaryDto getSummary(String email) {
+    // 🔹 ANALYTICS (GLOBAL)
+    public TaskSummaryDto getSummary() {
 
-        List<Task> tasks = taskRepo.findByUserEmail(email);
+        List<Task> tasks = taskRepo.findAll();
 
         TaskSummaryDto dto = new TaskSummaryDto();
 

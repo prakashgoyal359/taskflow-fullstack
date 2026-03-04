@@ -1,5 +1,6 @@
 package com.infy.authSystem.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,10 @@ public class CommentController {
 	private final CommentService commentService;
 
     // GET COMMENTS
-    @GetMapping("/api/tasks/{taskId}/comments")
-    public ResponseEntity<List<TaskComment>> getComments(@PathVariable Long taskId) {
-        return ResponseEntity.ok(commentService.getComments(taskId));
-    }
+	@GetMapping("/api/tasks/{taskId}/comments")
+	public List<TaskComment> getComments(@PathVariable Long taskId) {
+	    return commentService.getComments(taskId);
+	}
 
     // ADD COMMENT
     @PostMapping("/api/tasks/{taskId}/comments")
@@ -48,8 +49,12 @@ public class CommentController {
 
     // DELETE COMMENT
     @DeleteMapping("/api/comments/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long id, Authentication auth) {
-        commentService.deleteComment(id, auth.getName());
-        return ResponseEntity.ok(Map.of("message", "Deleted"));
+    public ResponseEntity<?> deleteComment(@PathVariable Long id, Principal principal) {
+
+        commentService.deleteComment(id, principal.getName());
+
+        return ResponseEntity.ok(
+            Map.of("message", "Comment deleted successfully")
+        );
     }
 }

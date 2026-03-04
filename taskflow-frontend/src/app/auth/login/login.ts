@@ -62,13 +62,11 @@ export class Login {
       })
       .subscribe({
         next: (res: any) => {
-          // 🔐 Save JWT token
           this.auth.saveToken(res.token);
 
-          // 🧑 Save user name for navbar
           localStorage.setItem('name', res.name || 'User');
+          localStorage.setItem('email', res.email);
 
-          // 🔁 Redirect to dashboard
           this.router.navigate(['/dashboard']);
         },
 

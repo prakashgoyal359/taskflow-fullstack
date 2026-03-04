@@ -2,7 +2,9 @@ package com.infy.authSystem.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.infy.authSystem.entity.Task;
 import com.infy.authSystem.entity.TaskComment;
@@ -17,24 +19,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final TaskCommentRepository commentRepo;
-    private final TaskRepository taskRepo;
-    private final UserRepository userRepo;
-
     public CommentService(TaskCommentRepository commentRepo, TaskRepository taskRepo, UserRepository userRepo) {
-		super();
 		this.commentRepo = commentRepo;
 		this.taskRepo = taskRepo;
 		this.userRepo = userRepo;
 	}
 
-	// GET COMMENTS
+	private final TaskCommentRepository commentRepo;
+    private final TaskRepository taskRepo;
+    private final UserRepository userRepo;
+
+    // GET COMMENTS (GLOBAL)
     public List<TaskComment> getComments(Long taskId) {
         return commentRepo.findByTaskIdOrderByCreatedAtAsc(taskId);
     }
 
     // ADD COMMENT
     public TaskComment addComment(Long taskId, String body, String email) {
+
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
@@ -49,14 +51,17 @@ public class CommentService {
         return commentRepo.save(comment);
     }
 
-    // DELETE COMMENT
+    // DELETE COMMENT (AUTHOR ONLY)
     public void deleteComment(Long id, String email) {
 
         TaskComment comment = commentRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
         if (!comment.getAuthor().getEmail().equals(email)) {
-            throw new RuntimeException("Not allowed to delete this comment");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You cannot delete another user's comment"
+            );
         }
 
         commentRepo.delete(comment);

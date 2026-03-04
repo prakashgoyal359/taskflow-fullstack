@@ -28,7 +28,7 @@ public class TaskController {
     // 🔹 GET ALL TASKS
     @GetMapping
     public ResponseEntity<List<Task>> getTasks(Authentication auth){
-        List<Task> tasks = taskService.getTasks(auth.getName());
+        List<Task> tasks = taskService.getTasks();
         return ResponseEntity.ok(tasks);
     }
 
@@ -70,6 +70,6 @@ public class TaskController {
     
     @GetMapping("/summary")
     public ResponseEntity<TaskSummaryDto> getSummary(Authentication auth) {
-        return ResponseEntity.ok(taskService.getSummary(auth.getName()));
+        return ResponseEntity.ok(taskService.getSummary());
     }
 }

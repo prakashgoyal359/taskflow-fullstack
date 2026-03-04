@@ -69,8 +69,13 @@
                 <p class="text-sm mt-1">{{ c.body }}</p>
               </div>
 
-              @if (c.author.fullName === currentUser) {
-                <button class="text-red-500 text-xs" (click)="deleteComment(c.id)">🗑</button>
+              @if (c.author?.fullName === currentUser) {
+                <button
+                  class="text-red-500 text-xs hover:text-red-700"
+                  (click)="deleteComment(c.id)"
+                >
+                  🗑
+                </button>
               }
             </div>
 

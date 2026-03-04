@@ -4,16 +4,19 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class Task {
   API = 'http://localhost:8080/api/tasks';
+  USERS = 'http://localhost:8080/api/users';
+  ACTIVITY = 'http://localhost:8080/api/activity';
 
   constructor(private http: HttpClient) {}
 
-  // GET ALL TASKS
+  // GET ALL TASKS (GLOBAL)
   getTasks() {
     return this.http.get(this.API);
   }
 
+  // GET USERS (FOR ASSIGN)
   getUsers() {
-    return this.http.get('http://localhost:8080/api/users');
+    return this.http.get(this.USERS);
   }
 
   // CREATE TASK
@@ -31,11 +34,13 @@ export class Task {
     return this.http.delete(`${this.API}/${id}`);
   }
 
+  // ANALYTICS
   getSummary() {
-    return this.http.get('http://localhost:8080/api/tasks/summary');
+    return this.http.get(`${this.API}/summary`);
   }
 
+  // ACTIVITY FEED
   getActivityFeed() {
-    return this.http.get('http://localhost:8080/api/activity');
+    return this.http.get(this.ACTIVITY);
   }
 }

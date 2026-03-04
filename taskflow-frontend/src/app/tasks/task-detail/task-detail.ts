@@ -1,8 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Task } from '../../services/task';
-import { HttpClient } from '@angular/common/http';
+import { CommentService } from '../../services/comment';
 
 @Component({
   selector: 'app-task-detail',
@@ -21,7 +20,7 @@ export class TaskDetail implements OnInit {
 
   isLoadingComments = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private commentService: CommentService) {}
 
   ngOnInit() {
     this.currentUser = localStorage.getItem('name') || '';
@@ -31,7 +30,7 @@ export class TaskDetail implements OnInit {
   loadComments() {
     this.isLoadingComments = true;
 
-    this.http.get(`http://localhost:8080/api/tasks/${this.task.id}/comments`).subscribe({
+    this.commentService.getComments(this.task.id).subscribe({
       next: (res: any) => {
         this.comments = res;
         this.isLoadingComments = false;
@@ -42,55 +41,45 @@ export class TaskDetail implements OnInit {
     });
   }
 
-  isPosting = false;
-
   postComment() {
     if (!this.newComment) return;
 
-    this.activity.emit({
-      actorName: localStorage.getItem('name'),
-      message: 'commented on a task',
-      actionType: 'COMMENT',
-      createdAt: new Date(),
-    });
-
     const tempComment = {
       body: this.newComment,
-      author: {
-        fullName: localStorage.getItem('name'),
-      },
+      author: { fullName: this.currentUser },
       createdAt: new Date(),
     };
 
-    // 🔥 instantly show in UI
+    // instant UI update
     this.comments.push(tempComment);
 
-    this.http
-      .post(`http://localhost:8080/api/tasks/${this.task.id}/comments`, {
-        body: this.newComment,
-      })
-      .subscribe({
-        next: () => {
-          this.newComment = '';
-        },
-        error: () => {
-          alert('Failed to post comment');
-        },
-      });
+    this.commentService.addComment(this.task.id, this.newComment).subscribe({
+      next: () => {
+        this.newComment = '';
+      },
+      error: () => {
+        alert('Failed to post comment');
+      },
+    });
   }
 
   deleteComment(id: number) {
-    // instant remove
+    const original = [...this.comments];
 
-    this.activity.emit({
-      actorName: localStorage.getItem('name'),
-      message: 'deleted a comment',
-      actionType: 'COMMENT',
-      createdAt: new Date(),
-    });
-
+    // remove instantly
     this.comments = this.comments.filter((c) => c.id !== id);
 
-    this.http.delete(`http://localhost:8080/api/comments/${id}`).subscribe();
+    this.commentService.deleteComment(id).subscribe({
+      next: () => {},
+
+      error: (err) => {
+        // restore if forbidden
+        if (err.status === 403) {
+          alert("You cannot delete another user's comment.");
+
+          this.comments = original;
+        }
+      },
+    });
   }
 }

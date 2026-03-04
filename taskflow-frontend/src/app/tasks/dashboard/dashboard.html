@@ -63,7 +63,7 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div class="p-3 bg-gray-50 rounded border-t-4 border-blue-500">
             <p class="text-sm text-gray-500">Completion Rate</p>
-            <h2 class="text-xl font-bold">{{ summary?.completionRate || 0 }}%</h2>
+            <h2 class="text-xl font-bold">{{ summary?.completionRate | number: '1.2-2' }}%</h2>
           </div>
 
           <div class="p-3 bg-gray-50 rounded border-t-4 border-red-500">
