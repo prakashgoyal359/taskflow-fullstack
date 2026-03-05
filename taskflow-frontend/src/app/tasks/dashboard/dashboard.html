@@ -1,6 +1,22 @@
 <app-navbar></app-navbar>
 
 <div class="p-4 bg-gray-100 min-h-screen">
+  <!-- 🔔 DUE DATE ALERT BANNER -->
+  @if (showBanner && (overdueCount > 0 || dueTodayCount > 0)) {
+    <div
+      class="mb-4 bg-red-50 border border-red-300 text-red-700 p-3 flex justify-between items-center rounded-lg shadow-sm"
+    >
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-red-500 text-lg">●</span>
+        You have {{ overdueCount }} overdue task(s) and {{ dueTodayCount }} task(s) due today.
+      </div>
+
+      <button class="text-red-600 text-sm hover:underline" (click)="showBanner = false">
+        [x] Dismiss
+      </button>
+    </div>
+  }
+
   <!-- 🔷 TOP STATS CARDS -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
     <div class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
@@ -120,9 +136,14 @@
           *ngFor="let t of filteredTasks"
           class="bg-white p-4 rounded-xl shadow border-l-4 transition hover:shadow-md"
           [ngClass]="{
-            'border-red-500': t.priority === 'HIGH',
-            'border-amber-500': t.priority === 'MEDIUM',
-            'border-green-500': t.priority === 'LOW',
+            'border-red-500': (t | taskDueDate) === 'overdue',
+
+            'border-amber-500':
+              (t | taskDueDate) === 'today' || t.priority === 'MEDIUM' || t.priority === 'LOW',
+
+            'border-green-500': (t | taskDueDate) === 'done',
+
+            'border-gray-300': (t | taskDueDate) === 'upcoming',
           }"
         >
           <!-- TITLE -->
@@ -250,8 +271,14 @@
 </div>
 
 <!-- 🔷 MODALS -->
+
 <app-task-form *ngIf="showForm" [task]="selectedTask" (close)="closeForm()" (refresh)="loadTasks()">
 </app-task-form>
 
-<app-task-detail *ngIf="showDetail" [task]="selectedTask" (close)="showDetail = false">
+<app-task-detail
+  *ngIf="showDetail"
+  [task]="selectedTask"
+  (close)="showDetail = false"
+  (activity)="addActivity($event)"
+>
 </app-task-detail>

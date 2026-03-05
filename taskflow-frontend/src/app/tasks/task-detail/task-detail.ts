@@ -42,23 +42,35 @@ export class TaskDetail implements OnInit {
   }
 
   postComment() {
-    if (!this.newComment) return;
 
-    const body = this.newComment;
+  if (!this.newComment) return;
 
-    this.commentService.addComment(this.task.id, body).subscribe({
-      next: (savedComment: any) => {
-        // add REAL comment with id
-        this.comments.push(savedComment);
+  const body = this.newComment;
 
-        this.newComment = '';
-      },
+  this.commentService.addComment(this.task.id, body).subscribe({
 
-      error: () => {
-        alert('Failed to post comment');
-      },
-    });
-  }
+    next: (savedComment: any) => {
+
+      this.comments.push(savedComment);
+      this.newComment = '';
+
+      // 🔥 ACTIVITY FEED ENTRY
+      this.activity.emit({
+        actorName: localStorage.getItem('name'),
+        message: `${localStorage.getItem('name')} commented on ${this.task.title}`,
+        actionType: 'COMMENT',
+        createdAt: new Date()
+      });
+
+    },
+
+    error: () => {
+      alert('Failed to post comment');
+    }
+
+  });
+
+}
 
   deleteComment(id: number) {
     if (!id) return;

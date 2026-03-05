@@ -31,6 +31,9 @@ export class Dashboard implements OnInit {
   activityFeed: any[] = [];
   loadingFeed = false;
 
+  overdueCount = 0;
+  dueTodayCount = 0;
+  showBanner = true;
   today = new Date().toISOString().split('T')[0];
 
   constructor(
@@ -49,10 +52,24 @@ export class Dashboard implements OnInit {
     this.taskService.getTasks().subscribe((res: any) => {
       this.tasks = res;
       this.filterTasks(this.activeTab);
+      this.calculateDueDateAlerts();
       this.sortByPriority();
       this.cdr.detectChanges();
       this.loadFeed();
     });
+  }
+
+  addActivity(activity: any) {
+    if (!this.activityFeed) {
+      this.activityFeed = [];
+    }
+
+    this.activityFeed.unshift(activity);
+
+    // keep only latest 20 items
+    if (this.activityFeed.length > 20) {
+      this.activityFeed.pop();
+    }
   }
 
   toggleAnalytics() {
@@ -244,4 +261,18 @@ export class Dashboard implements OnInit {
       return d1 - d2;
     });
   }
+
+  calculateDueDateAlerts() {
+    const today = new Date().toISOString().split('T')[0];
+
+    this.overdueCount = this.tasks.filter(
+      (t: any) => t.dueDate && t.dueDate < today && t.status !== 'DONE',
+    ).length;
+
+    this.dueTodayCount = this.tasks.filter(
+      (t: any) => t.dueDate === today && t.status !== 'DONE',
+    ).length;
+  }
+
+  
 }
