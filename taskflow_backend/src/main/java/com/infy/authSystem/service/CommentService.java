@@ -19,10 +19,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 
-    public CommentService(TaskCommentRepository commentRepo, TaskRepository taskRepo, UserRepository userRepo) {
+    private final ActivityService activityService;
+
+    public CommentService(TaskCommentRepository commentRepo, TaskRepository taskRepo, UserRepository userRepo, ActivityService activityService) {
 		this.commentRepo = commentRepo;
 		this.taskRepo = taskRepo;
 		this.userRepo = userRepo;
+		this.activityService = activityService;
 	}
 
 	private final TaskCommentRepository commentRepo;
@@ -48,9 +51,18 @@ public class CommentService {
         comment.setAuthor(user);
         comment.setBody(body);
 
-        return commentRepo.save(comment);
-    }
+        TaskComment saved = commentRepo.save(comment);
 
+        // 🔥 LOG COMMENT ACTIVITY
+        activityService.log(
+                "COMMENT",
+                user.getFullName() + " commented on " + task.getTitle(),
+                user.getFullName(),
+                task.getId()
+        );
+
+        return saved;
+    }
     // DELETE COMMENT (AUTHOR ONLY)
     public void deleteComment(Long id, String email) {
 

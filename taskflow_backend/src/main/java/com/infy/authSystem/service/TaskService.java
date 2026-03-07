@@ -11,6 +11,7 @@ import com.infy.authSystem.entity.User;
 import com.infy.authSystem.repository.TaskRepository;
 import com.infy.authSystem.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -117,6 +118,7 @@ public class TaskService {
     }
 
     // 🔹 DELETE TASK (GLOBAL)
+    @Transactional
     public void deleteTask(Long id, String email) {
 
         Task existingTask = taskRepo.findById(id)
@@ -125,6 +127,11 @@ public class TaskService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!existingTask.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("You are not allowed to delete this task");
+        }
+
+        // 🔥 Log delete activity
         activityService.log(
                 "DELETE",
                 user.getFullName() + " deleted task " + existingTask.getTitle(),
@@ -132,6 +139,10 @@ public class TaskService {
                 null
         );
 
+        // 🔥 Detach task from previous activities
+        activityService.removeTaskReference(id);
+
+        // 🔥 Delete task
         taskRepo.delete(existingTask);
     }
 

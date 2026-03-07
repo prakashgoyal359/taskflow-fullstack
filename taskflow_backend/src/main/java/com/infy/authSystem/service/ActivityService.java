@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.infy.authSystem.entity.ActivityLog;
 import com.infy.authSystem.repository.ActivityRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,4 +36,9 @@ public class ActivityService {
     public List<ActivityLog> getRecent() {
         return repo.findTop20ByOrderByCreatedAtDesc();
     }
+    
+	@Transactional
+	public void removeTaskReference(Long taskId) {
+		repo.detachTaskFromActivities(taskId);
+	}
 }
