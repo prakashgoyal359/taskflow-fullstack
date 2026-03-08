@@ -6,9 +6,20 @@ import { authGuard } from './guards/auth-guard';
 import { NotFound } from './shared/navbar/notFound/not-found';
 
 export const routes: Routes = [
-  { path: '', component: Login },
+  // Default route
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+
+  // Public routes
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+
+  // Protected route
+  {
+    path: 'dashboard',
+    component: Dashboard,
+    canActivate: [authGuard],
+  },
+
+  // 404 page
   { path: '**', component: NotFound },
 ];

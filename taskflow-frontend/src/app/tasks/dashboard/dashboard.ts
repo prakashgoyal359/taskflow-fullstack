@@ -6,6 +6,7 @@ import { Navbar } from '../../shared/navbar/navbar';
 import { ChangeDetectorRef } from '@angular/core';
 import { TaskDetail } from '../task-detail/task-detail';
 import { TaskDueDatePipe } from '../../pipes/task-due-date/task-due-date';
+import { Router } from '@angular/router';
 
 declare var Chart: any;
 
@@ -39,11 +40,49 @@ export class Dashboard implements OnInit {
   constructor(
     private taskService: Task,
     private cdr: ChangeDetectorRef,
+    private router: Router,
   ) {}
 
   ngOnInit() {
-    this.loadTasks();
-    this.loadFeed();
+    const token = localStorage.getItem('token');
+
+    // ❌ No token → redirect to login
+    if (!token) {
+      this.router.navigate(['/login'], { replaceUrl: true });
+      return;
+    }
+
+    try {
+      // 🔓 Decode JWT
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const expiry = payload.exp * 1000;
+
+      // ❌ Token expired
+      if (Date.now() > expiry) {
+        console.warn('JWT expired');
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('name');
+
+        this.router.navigate(['/login'], { replaceUrl: true });
+
+        return;
+      }
+    } catch (err) {
+      // ❌ Invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('name');
+
+      this.router.navigate(['/login'], { replaceUrl: true });
+
+      return;
+    }
+
+    setTimeout(() => {
+      this.loadTasks();
+      this.loadFeed();
+    });
   }
 
   loading = false;
@@ -273,6 +312,4 @@ export class Dashboard implements OnInit {
       (t: any) => t.dueDate === today && t.status !== 'DONE',
     ).length;
   }
-
-  
 }

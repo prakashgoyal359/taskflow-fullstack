@@ -20,7 +20,8 @@ public class JwtUtil {
         return Jwts.builder()
         		.setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+//                .setExpiration(new Date(System.currentTimeMillis() + 30000))
                 .signWith(SECRET_KEY)
                 .compact();
     }

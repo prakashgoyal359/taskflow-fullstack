@@ -4,18 +4,44 @@ import { inject } from '@angular/core';
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
-  // 🔐 get token
   const token = localStorage.getItem('token');
 
-  // ✅ if token exists → allow access
-  if (token) {
-    return true;
+  // ❌ No token
+  if (!token) {
+    router.navigate(['/login'], {
+      queryParams: { returnUrl: state.url },
+    });
+    return false;
   }
 
-  // ❌ if no token → redirect to login
-  router.navigate(['/login'], {
-    queryParams: { returnUrl: state.url }, // optional redirect back after login
-  });
+  try {
+    // 🔓 decode JWT payload
+    const payload = JSON.parse(atob(token.split('.')[1]));
 
-  return false;
+    const expiry = payload.exp * 1000;
+
+    // ❌ Token expired
+    if (Date.now() > expiry) {
+      console.warn('JWT expired');
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('name');
+
+      router.navigate(['/login'], {
+        queryParams: { returnUrl: state.url },
+      });
+
+      return false;
+    }
+
+    // ✅ Token valid
+    return true;
+  } catch (err) {
+    // ❌ Invalid token
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+
+    router.navigate(['/login']);
+    return false;
+  }
 };
