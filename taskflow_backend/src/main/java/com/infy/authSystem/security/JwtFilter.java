@@ -61,7 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                         // 🔹 Authority WITHOUT ROLE_ prefix
                         SimpleGrantedAuthority authority =
-                                new SimpleGrantedAuthority(user.getRole().name());
+                                new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
 
                         UsernamePasswordAuthenticationToken auth =
                                 new UsernamePasswordAuthenticationToken(

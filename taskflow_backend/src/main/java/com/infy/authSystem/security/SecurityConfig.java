@@ -27,6 +27,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
+		
 		this.jwtFilter = jwtFilter;
 	}
 
@@ -35,7 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // Disable CSRF for APIs
+            // Disable CSRF (for APIs)
             .csrf(csrf -> csrf.disable())
 
             // Enable CORS
@@ -44,41 +45,41 @@ public class SecurityConfig {
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
 
-                // PUBLIC ENDPOINTS
+                // PUBLIC
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // ADMIN APIs
-                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 // TEAM MANAGEMENT
-                .requestMatchers("/api/teams/**").hasAnyAuthority("ADMIN","MANAGER")
+                .requestMatchers("/api/teams/**").hasAnyRole("ADMIN","MANAGER")
 
                 // TASK APIs
                 .requestMatchers("/api/tasks/**")
-                    .hasAnyAuthority("ADMIN","MANAGER","MEMBER")
+                    .hasAnyRole("ADMIN","MANAGER","MEMBER")
 
                 // COMMENTS
                 .requestMatchers("/api/comments/**")
-                    .hasAnyAuthority("ADMIN","MANAGER","MEMBER")
+                    .hasAnyRole("ADMIN","MANAGER","MEMBER")
 
                 // USERS
                 .requestMatchers("/api/users/**")
-                    .hasAnyAuthority("ADMIN","MANAGER")
+                    .hasAnyRole("ADMIN","MANAGER")
 
                 // ACTIVITY
                 .requestMatchers("/api/activity/**")
-                    .hasAnyAuthority("ADMIN","MANAGER","MEMBER")
+                    .hasAnyRole("ADMIN","MANAGER","MEMBER")
 
-                // ANY OTHER REQUEST
+                // Everything else
                 .anyRequest().authenticated()
             )
 
-            // JWT STATELESS SESSION
-            .sessionManagement(sess -> sess
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            // JWT stateless session
+            .sessionManagement(sess ->
+                sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // JWT FILTER
+            // Add JWT filter
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -90,7 +91,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 🌐 CORS CONFIGURATION (Angular)
+    // 🌐 CORS CONFIG
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -101,7 +102,9 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", config);
 
         return source;
