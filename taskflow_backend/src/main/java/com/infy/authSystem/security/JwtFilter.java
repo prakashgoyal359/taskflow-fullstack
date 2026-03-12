@@ -27,14 +27,16 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserRepository userRepo;
 
     public JwtFilter(JwtUtil jwtUtil, UserRepository userRepo) {
+		super();
 		this.jwtUtil = jwtUtil;
 		this.userRepo = userRepo;
 	}
 
 	@Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
@@ -44,7 +46,9 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try {
+            	
 
+                // 🔹 Extract email from JWT
                 String email = jwtUtil.extractEmail(token);
 
                 if (email != null &&
@@ -55,13 +59,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     if (user != null) {
 
-                        // 🔹 Convert role to Spring Security authority
+                        // 🔹 Authority WITHOUT ROLE_ prefix
                         SimpleGrantedAuthority authority =
-                                new SimpleGrantedAuthority("ROLE_" + user.getRole());
+                                new SimpleGrantedAuthority(user.getRole().name());
 
                         UsernamePasswordAuthenticationToken auth =
                                 new UsernamePasswordAuthenticationToken(
-                                        email,
+                                        user.getEmail(),
                                         null,
                                         List.of(authority)
                                 );
@@ -71,11 +75,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                         .buildDetails(request)
                         );
 
-                        SecurityContextHolder.getContext()
-                                .setAuthentication(auth);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
 
-                        // Debug
-                        System.out.println("Authenticated user: " + email);
+                        // Debug log
+                        System.out.println("Authenticated user: "
+                                + user.getEmail() + " Role: "
+                                + user.getRole().name());
+                        
+                        System.out.println("User role from DB: " + user.getRole());
                     }
                 }
 
