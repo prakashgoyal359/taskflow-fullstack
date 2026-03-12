@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,22 +22,8 @@ public class Team {
     private Long id;
 
     private String name;
-    
+
     private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private User manager;
-
-    @ManyToMany
-    @JoinTable(
-            name = "team_members",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> members = new ArrayList<>();
-
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() {
 		return id;
@@ -84,5 +73,21 @@ public class Team {
 		this.createdAt = createdAt;
 	}
 
-	
+	// TEAM MANAGER
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    @JsonIgnoreProperties({"passwordHash"})
+    private User manager;
+
+    // TEAM MEMBERS
+    @ManyToMany
+    @JoinTable(
+            name = "team_members",
+            joinColumns = @JoinColumn(name = "team_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @JsonIgnoreProperties({"passwordHash"})
+    private List<User> members = new ArrayList<>();
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

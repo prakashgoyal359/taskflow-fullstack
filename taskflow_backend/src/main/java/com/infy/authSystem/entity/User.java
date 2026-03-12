@@ -1,19 +1,15 @@
 package com.infy.authSystem.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -21,35 +17,11 @@ public class User {
     private Long id;
 
     private String fullName;
-    
+
     @Column(unique = true)
     private String email;
 
-    private String passwordHash;
-
-    @Enumerated(EnumType.STRING)
-    private Role role = Role.MEMBER;
-
-    private boolean isActive = true;
-    
-    
-    public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	public Long getId() {
+    public Long getId() {
 		return id;
 	}
 
@@ -81,5 +53,27 @@ public class User {
 		this.passwordHash = passwordHash;
 	}
 
-	
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	@JsonIgnore
+    private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.MEMBER;
+
+    private boolean isActive = true;
 }

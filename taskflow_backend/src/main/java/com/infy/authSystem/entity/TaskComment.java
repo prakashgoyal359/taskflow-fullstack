@@ -3,20 +3,16 @@ package com.infy.authSystem.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 public class TaskComment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "task_id", nullable = false)
-    private Task task;
 
     public Long getId() {
 		return id;
@@ -58,7 +54,19 @@ public class TaskComment {
 		this.createdAt = createdAt;
 	}
 
-	@ManyToOne
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // TASK
+    @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
+    @JsonIgnore
+    private Task task;
+
+    // AUTHOR
+    @ManyToOne
+    @JsonIgnoreProperties({"passwordHash"})
     private User author;
 
     @Column(columnDefinition = "TEXT")
