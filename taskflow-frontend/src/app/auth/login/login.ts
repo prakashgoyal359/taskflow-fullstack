@@ -51,9 +51,7 @@ export class Login {
     this.validateEmail();
     this.validatePassword();
 
-    if (this.emailError || this.passwordError) {
-      return;
-    }
+    if (this.emailError || this.passwordError) return;
 
     this.auth
       .login({
@@ -64,10 +62,15 @@ export class Login {
         next: (res: any) => {
           this.auth.saveToken(res.token);
 
-          localStorage.setItem('name', res.name || 'User');
-          localStorage.setItem('email', res.email);
+          const role = localStorage.getItem('role');
 
-          this.router.navigate(['/dashboard']);
+          if (role === 'ADMIN') {
+            this.router.navigate(['/admin']);
+          } else if (role === 'MANAGER') {
+            this.router.navigate(['/teams']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         },
 
         error: () => {

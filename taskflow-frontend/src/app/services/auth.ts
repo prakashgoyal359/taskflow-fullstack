@@ -17,9 +17,15 @@ export class AuthService {
 
   saveToken(token: string) {
     localStorage.setItem('token', token);
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    localStorage.setItem('role', payload.role);
+    localStorage.setItem('name', payload.fullName);
+    localStorage.setItem('email', payload.sub);
   }
 
   logout() {
-    localStorage.removeItem('token');
+    localStorage.clear();
   }
 }

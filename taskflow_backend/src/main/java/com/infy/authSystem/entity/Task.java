@@ -28,9 +28,19 @@ public class Task {
 	private LocalDate dueDate;
 	private String status;
 	
+	private String priority; // HIGH / MEDIUM / LOW
+	
 	@ManyToOne
 	@JoinColumn(name = "assigned_to")
 	private User assignee;
+
+	@ManyToOne
+	private User user;
+
+	@ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+	
 	
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<TaskComment> comments;
@@ -50,11 +60,6 @@ public class Task {
 	public void setPriority(String priority) {
 		this.priority = priority;
 	}
-
-	private String priority; // HIGH / MEDIUM / LOW
-
-	@ManyToOne
-	private User user;
 
 	public Long getId() {
 		return id;
@@ -102,5 +107,21 @@ public class Task {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public Team getTeam() {
+		return team;
+	}
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
+
+	public List<TaskComment> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<TaskComment> comments) {
+		this.comments = comments;
 	}
 }

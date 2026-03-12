@@ -62,7 +62,7 @@ public class AuthService {
         }
 
         // generate JWT token
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user);
 
         // return BOTH token + name
         return Map.of(

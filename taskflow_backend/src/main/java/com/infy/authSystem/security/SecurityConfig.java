@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
-		super();
 		this.jwtFilter = jwtFilter;
 	}
 
@@ -33,29 +34,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        return http
-                // 🔹 Disable CSRF (for APIs)
-                .csrf(csrf -> csrf.disable())
+        http
+            // Disable CSRF for API
+            .csrf(csrf -> csrf.disable())
 
-                // 🔹 Enable CORS
-                .cors(cors -> {})
+            // Enable CORS
+            .cors(cors -> {})
 
-                // 🔹 Authorize Requests
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() 
-                        .requestMatchers("/api/tasks/**").authenticated()
-                        .anyRequest().authenticated()                       // all others protected
-                )
+            // Authorization rules
+            .authorizeHttpRequests(auth -> auth
 
-                // 🔹 Stateless Session (JWT)
-                .sessionManagement(sess -> sess
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                // Public endpoints
+                .requestMatchers("/api/auth/**").permitAll()
 
-                // 🔹 Add JWT Filter before UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // Protected APIs
+                .requestMatchers("/api/tasks/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
+                .requestMatchers("/api/teams/**").hasAnyRole("ADMIN","MANAGER")
+                .requestMatchers("/api/comments/**").authenticated()
+                .requestMatchers("/api/activity/**").authenticated()
 
-                .build();
+                // everything else secured
+                .anyRequest().authenticated()
+            )
+
+            // JWT stateless session
+            .sessionManagement(sess -> sess
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // JWT Filter
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     // 🔐 PASSWORD ENCODER
@@ -64,14 +75,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 🌐 CORS CONFIGURATION (for Angular)
+    // 🌐 CORS CONFIG (for Angular)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:4200"));  // Angular URL
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 

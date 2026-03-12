@@ -1,0 +1,156 @@
+<app-navbar></app-navbar>
+
+<div class="p-6">
+  <!-- STATS -->
+
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white shadow p-4 rounded">
+      <p class="text-gray-500">My Teams</p>
+      <h2 class="text-2xl font-bold">{{ teams.length }}</h2>
+    </div>
+
+    <div class="bg-white shadow p-4 rounded">
+      <p class="text-gray-500">Total Members</p>
+      <h2 class="text-2xl font-bold">{{ totalMembers }}</h2>
+    </div>
+
+    <div class="bg-white shadow p-4 rounded">
+      <p class="text-gray-500">Active Tasks</p>
+      <h2 class="text-2xl font-bold">{{ activeTasks }}</h2>
+    </div>
+  </div>
+
+  <!-- CREATE TEAM -->
+
+  <div class="flex justify-end mb-4">
+    <button
+      *appHasRole="['ADMIN', 'MANAGER']"
+      (click)="openCreateTeam()"
+      class="bg-green-600 text-white px-4 py-2 rounded"
+    >
+      + Create Team
+    </button>
+  </div>
+
+  <!-- TEAM CARDS -->
+
+  <div class="grid grid-cols-3 gap-6">
+    <div *ngFor="let team of teams" class="bg-white rounded shadow border">
+      <div class="h-2 bg-blue-500 rounded-t"></div>
+
+      <div class="p-4">
+        <h3 class="font-bold">{{ team.name }}</h3>
+
+        <p class="text-sm text-gray-500">{{ team.members?.length }} members</p>
+
+        <p class="text-sm text-gray-400">Manager: {{ team.manager?.fullName }}</p>
+
+        <div class="flex gap-1 mt-2">
+          <span *ngFor="let m of team.members" class="bg-blue-200 text-xs px-2 py-1 rounded">
+            {{ m.fullName[0] }}
+          </span>
+        </div>
+
+        <span class="text-xs bg-yellow-200 px-2 py-1 rounded mt-2 inline-block">
+          {{ team.activeTasks || 0 }} tasks active
+        </span>
+
+        <div class="flex gap-2 mt-4">
+          <button (click)="viewTeam(team)" class="bg-blue-600 text-white px-3 py-1 rounded">
+            View Team
+          </button>
+
+          <button
+            *appHasRole="['ADMIN', 'MANAGER']"
+            (click)="deleteTeam(team.id)"
+            class="bg-red-500 text-white px-3 py-1 rounded"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM DETAILS -->
+
+  <div *ngIf="selectedTeam" class="mt-8 bg-white shadow rounded p-4">
+    <h2 class="font-bold mb-4">Team Detail — {{ selectedTeam.name }}</h2>
+
+    <button
+      *appHasRole="['ADMIN', 'MANAGER']"
+      (click)="openMemberDropdown()"
+      class="bg-green-600 text-white px-3 py-1 rounded mb-3"
+    >
+      + Add Member
+    </button>
+
+    <!-- MEMBER DROPDOWN -->
+
+    <div *ngIf="showMemberDropdown" class="mb-3">
+      <select [(ngModel)]="selectedMemberId" class="border p-2 rounded">
+        <option value="">Select Member</option>
+
+        <option *ngFor="let u of users" [value]="u.id">
+          {{ u.fullName }}
+        </option>
+      </select>
+
+      <button (click)="addMember()" class="bg-blue-600 text-white px-3 py-1 rounded ml-2">
+        Add
+      </button>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Email</th>
+          <th>Tasks</th>
+          <th>Joined</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let m of selectedTeam.members">
+          <td>{{ m.fullName }}</td>
+
+          <td>
+            <span
+              class="px-2 py-1 rounded text-xs"
+              [ngClass]="{
+                'bg-red-200': m.role === 'ADMIN',
+                'bg-purple-200': m.role === 'MANAGER',
+                'bg-blue-200': m.role === 'MEMBER',
+                'bg-gray-200': m.role === 'VIEWER',
+              }"
+            >
+              {{ m.role }}
+            </span>
+          </td>
+
+          <td>{{ m.email }}</td>
+
+          <td>{{ m.tasksAssigned || 0 }}</td>
+
+          <td>{{ m.joined }}</td>
+
+          <td>
+            <button
+              *appHasRole="['ADMIN', 'MANAGER']"
+              (click)="removeMember(m.id)"
+              class="bg-red-500 text-white px-2 py-1 rounded text-xs"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<app-create-team-form *ngIf="showCreateForm" (close)="closeCreateTeam()" (refresh)="loadTeams()">
+</app-create-team-form>

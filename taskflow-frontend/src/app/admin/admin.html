@@ -1,0 +1,138 @@
+<app-navbar></app-navbar>
+
+<div class="p-6">
+
+<h2 class="text-xl font-bold mb-4">
+Admin Panel — User Management
+</h2>
+
+<!-- STATS -->
+
+<div class="grid grid-cols-4 gap-4 mb-4">
+
+<div class="bg-white shadow p-3 rounded">
+Total Users
+<h3>{{stats.total}}</h3>
+</div>
+
+<div class="bg-white shadow p-3 rounded">
+Admins
+<h3>{{stats.admin}}</h3>
+</div>
+
+<div class="bg-white shadow p-3 rounded">
+Managers
+<h3>{{stats.manager}}</h3>
+</div>
+
+<div class="bg-white shadow p-3 rounded">
+Deactivated
+<h3>{{stats.inactive}}</h3>
+</div>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<input
+[(ngModel)]="search"
+placeholder="Search users..."
+class="border p-2 w-full mb-3">
+
+
+<!-- USERS TABLE -->
+
+<table class="w-full text-sm">
+
+<thead class="bg-blue-600 text-white">
+
+<tr>
+<th>User</th>
+<th>Email</th>
+<th>Role</th>
+<th>Status</th>
+<th>Teams</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr *ngFor="let u of users">
+
+<td>{{u.fullName}}</td>
+
+<td>{{u.email}}</td>
+
+<td>
+
+<select
+[(ngModel)]="u.role"
+(change)="changeRole(u)">
+
+<option>ADMIN</option>
+<option>MANAGER</option>
+<option>MEMBER</option>
+<option>VIEWER</option>
+
+</select>
+
+</td>
+
+<td>
+
+<span
+class="px-2 py-1 rounded"
+[ngClass]="{
+'bg-green-200':u.active,
+'bg-red-200':!u.active
+}">
+{{u.active?'Active':'Inactive'}}
+</span>
+
+</td>
+
+<td>{{u.teams}}</td>
+
+<td>
+
+<button
+(click)="toggleActive(u)"
+class="bg-yellow-500 text-white px-2 py-1 rounded">
+
+{{u.active?'Deactivate':'Activate'}}
+
+</button>
+
+<button
+(click)="deleteUser(u.id)"
+class="bg-red-500 text-white px-2 py-1 rounded">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<!-- RBAC REFERENCE -->
+
+<div class="mt-6 border p-3 bg-blue-50">
+
+<b>Role Permissions Quick Reference:</b>
+
+<p>
+Admin: full control |
+Manager: create teams |
+Member: create tasks |
+Viewer: read only
+</p>
+
+</div>
+
+</div>
