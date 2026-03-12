@@ -8,26 +8,32 @@ export class TeamService {
 
   constructor(private http: HttpClient) {}
 
+  // GET TEAMS
   getTeams() {
     return this.http.get(this.API);
   }
 
+  // CREATE TEAM
   createTeam(data: any) {
     return this.http.post(this.API, data);
   }
 
+  // DELETE TEAM
   deleteTeam(id: number) {
     return this.http.delete(`${this.API}/${id}`);
   }
 
+  // ADD MEMBER
   addMember(teamId: number, userId: number) {
-    return this.http.post(`${this.API}/${teamId}/members`, { userId: userId });
+    return this.http.post(`${this.API}/${teamId}/members/${userId}`, {});
   }
 
+  // REMOVE MEMBER
   removeMember(teamId: number, userId: number) {
     return this.http.delete(`${this.API}/${teamId}/members/${userId}`);
   }
 
+  // GET USERS
   getUsers() {
     return this.http.get(this.USERS);
   }

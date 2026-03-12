@@ -3,6 +3,8 @@ package com.infy.authSystem.controller;
 import com.infy.authSystem.entity.Team;
 import com.infy.authSystem.service.TeamService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,47 +16,65 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class TeamController {
 
-    private final TeamService teamService;
-
     public TeamController(TeamService teamService) {
 		this.teamService = teamService;
 	}
 
-	@PostMapping
-    public Team createTeam(@RequestBody Team team, Authentication auth){
+	private final TeamService teamService;
 
-        return teamService.createTeam(team, auth.getName());
+    // CREATE TEAM
+    @PostMapping
+    public ResponseEntity<Team> createTeam(@RequestBody Team team, Authentication auth) {
+
+        Team created = teamService.createTeam(team, auth.getName());
+
+        return ResponseEntity.ok(created);
     }
 
+    // GET TEAMS (ADMIN → all teams, MANAGER → own teams)
     @GetMapping
-    public List<Team> getTeams(Authentication auth){
+    public ResponseEntity<List<Team>> getTeams(Authentication auth) {
 
-        return teamService.getTeams(auth.getName());
+        List<Team> teams = teamService.getTeams(auth.getName());
+
+        return ResponseEntity.ok(teams);
     }
 
+    // GET SINGLE TEAM
     @GetMapping("/{id}")
-    public Team getTeam(@PathVariable Long id){
+    public ResponseEntity<Team> getTeam(@PathVariable Long id) {
 
-        return teamService.getTeam(id);
+        return ResponseEntity.ok(teamService.getTeam(id));
     }
 
-    @PostMapping("/{id}/members")
-    public Team addMember(@PathVariable Long id,
-                          @RequestParam Long userId){
+    // ADD MEMBER
+    @PostMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Team> addMember(
+            @PathVariable Long teamId,
+            @PathVariable Long userId) {
 
-        return teamService.addMember(id, userId);
+        Team team = teamService.addMember(teamId, userId);
+
+        return ResponseEntity.ok(team);
     }
 
-    @DeleteMapping("/{id}/members/{userId}")
-    public Team removeMember(@PathVariable Long id,
-                             @PathVariable Long userId){
+    // REMOVE MEMBER
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Team> removeMember(
+            @PathVariable Long teamId,
+            @PathVariable Long userId) {
 
-        return teamService.removeMember(id, userId);
+        Team team = teamService.removeMember(teamId, userId);
+
+        return ResponseEntity.ok(team);
     }
 
+    // DELETE TEAM
     @DeleteMapping("/{id}")
-    public void deleteTeam(@PathVariable Long id){
+    public ResponseEntity<?> deleteTeam(@PathVariable Long id) {
 
         teamService.deleteTeam(id);
+
+        return ResponseEntity.ok().build();
     }
 }

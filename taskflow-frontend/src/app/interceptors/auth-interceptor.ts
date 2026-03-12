@@ -24,7 +24,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error) => {
       // 🔴 Token expired or invalid
-      if (error.status === 401 || error.status === 403) {
+      if (error.status === 401) {
         console.warn('JWT expired. Logging out...');
 
         alert('Session expired. Please login again.');

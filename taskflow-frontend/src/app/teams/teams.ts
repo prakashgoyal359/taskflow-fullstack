@@ -66,6 +66,9 @@ export class Teams implements OnInit {
 
   loadMembers() {
     this.teamService.getUsers().subscribe((res: any) => {
+      console.log('ALL USERS:', res);
+
+      // show only MEMBER role
       this.users = res.filter((u: any) => u.role === 'MEMBER');
     });
   }
@@ -73,10 +76,20 @@ export class Teams implements OnInit {
   addMember() {
     if (!this.selectedMemberId) return;
 
-    this.teamService.addMember(this.selectedTeam.id, this.selectedMemberId).subscribe(() => {
-      this.showMemberDropdown = false;
+    this.teamService.addMember(this.selectedTeam.id, this.selectedMemberId).subscribe({
+      next: () => {
+        this.showMemberDropdown = false;
+        this.selectedMemberId = null;
 
-      this.loadTeams();
+        this.loadTeams();
+
+        // reload selected team
+        this.selectedTeam = this.teams.find((t: any) => t.id === this.selectedTeam.id);
+      },
+
+      error: (err) => {
+        console.error('Add member failed', err);
+      },
     });
   }
 

@@ -18,21 +18,25 @@ public class UserController {
 
     private final UserRepository userRepo;
 
-    @GetMapping
+    public UserController(UserRepository userRepo) {
+		super();
+		this.userRepo = userRepo;
+	}
+
+	@GetMapping
     public List<Map<String, Object>> getUsers() {
 
         return userRepo.findAll().stream().map(u -> {
 
             Map<String, Object> map = new HashMap<>();
+
             map.put("id", u.getId());
             map.put("fullName", u.getFullName());
+            map.put("email", u.getEmail());
+            map.put("role", u.getRole().name());
 
             return map;
 
         }).toList();
     }
-
-	public UserController(UserRepository userRepo) {
-		this.userRepo = userRepo;
-	}
 }
