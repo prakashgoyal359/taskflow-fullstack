@@ -119,7 +119,7 @@ public class TaskService {
     }
 
     // ANALYTICS
-    public TaskSummaryDto getSummary(){
+    public TaskSummaryDto getSummary() {
 
         List<Task> tasks = taskRepo.findAll();
 
@@ -127,17 +127,33 @@ public class TaskService {
 
         dto.setTotalTasks(tasks.size());
 
-        dto.setTodo(tasks.stream().filter(t->"TODO".equals(t.getStatus())).count());
-        dto.setInProgress(tasks.stream().filter(t->"IN_PROGRESS".equals(t.getStatus())).count());
-        dto.setDone(tasks.stream().filter(t->"DONE".equals(t.getStatus())).count());
+        dto.setTodo(tasks.stream().filter(t -> "TODO".equals(t.getStatus())).count());
+        dto.setInProgress(tasks.stream().filter(t -> "IN_PROGRESS".equals(t.getStatus())).count());
+        dto.setDone(tasks.stream().filter(t -> "DONE".equals(t.getStatus())).count());
 
         LocalDate today = LocalDate.now();
 
         dto.setOverdue(tasks.stream()
-                .filter(t->t.getDueDate()!=null &&
-                        t.getDueDate().isBefore(today) &&
-                        !"DONE".equals(t.getStatus()))
+                .filter(t -> t.getDueDate() != null && t.getDueDate().isBefore(today) && !"DONE".equals(t.getStatus()))
                 .count());
+
+        dto.setDueToday(tasks.stream()
+                .filter(t -> t.getDueDate() != null && t.getDueDate().isEqual(today))
+                .count());
+
+        dto.setThisWeek(tasks.stream()
+                .filter(t -> t.getDueDate() != null &&
+                        !t.getDueDate().isBefore(today) &&
+                        !t.getDueDate().isAfter(today.plusDays(7)))
+                .count());
+
+        dto.setHigh(tasks.stream().filter(t -> "HIGH".equals(t.getPriority())).count());
+        dto.setMedium(tasks.stream().filter(t -> "MEDIUM".equals(t.getPriority())).count());
+        dto.setLow(tasks.stream().filter(t -> "LOW".equals(t.getPriority())).count());
+
+        if (dto.getTotalTasks() > 0) {
+            dto.setCompletionRate((dto.getDone() * 100.0) / dto.getTotalTasks());
+        }
 
         return dto;
     }
