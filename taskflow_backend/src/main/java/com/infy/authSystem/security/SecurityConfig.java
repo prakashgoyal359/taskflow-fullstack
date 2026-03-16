@@ -61,6 +61,7 @@ public class SecurityConfig {
                 // COMMENTS
                 .requestMatchers("/api/comments/**")
                     .hasAnyRole("ADMIN","MANAGER","MEMBER")
+                    
 
                 // USERS
                 .requestMatchers("/api/users/**")
@@ -69,6 +70,7 @@ public class SecurityConfig {
                 // ACTIVITY
                 .requestMatchers("/api/activity/**")
                     .hasAnyRole("ADMIN","MANAGER","MEMBER")
+                    
 
                 // Everything else
                 .anyRequest().authenticated()

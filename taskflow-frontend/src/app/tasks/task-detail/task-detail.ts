@@ -2,11 +2,11 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommentService } from '../../services/comment';
-
+import { AttachmentsComponent } from '../../attachments/attachments.component';
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AttachmentsComponent],
   templateUrl: './task-detail.html',
 })
 export class TaskDetail implements OnInit {
@@ -42,35 +42,29 @@ export class TaskDetail implements OnInit {
   }
 
   postComment() {
+    if (!this.newComment) return;
 
-  if (!this.newComment) return;
+    const body = this.newComment;
 
-  const body = this.newComment;
+    this.commentService.addComment(this.task.id, body).subscribe({
+      next: (savedComment: any) => {
+        this.comments.push(savedComment);
+        this.newComment = '';
 
-  this.commentService.addComment(this.task.id, body).subscribe({
+        // 🔥 ACTIVITY FEED ENTRY
+        this.activity.emit({
+          actorName: localStorage.getItem('name'),
+          message: `${localStorage.getItem('name')} commented on ${this.task.title}`,
+          actionType: 'COMMENT',
+          createdAt: new Date(),
+        });
+      },
 
-    next: (savedComment: any) => {
-
-      this.comments.push(savedComment);
-      this.newComment = '';
-
-      // 🔥 ACTIVITY FEED ENTRY
-      this.activity.emit({
-        actorName: localStorage.getItem('name'),
-        message: `${localStorage.getItem('name')} commented on ${this.task.title}`,
-        actionType: 'COMMENT',
-        createdAt: new Date()
-      });
-
-    },
-
-    error: () => {
-      alert('Failed to post comment');
-    }
-
-  });
-
-}
+      error: () => {
+        alert('Failed to post comment');
+      },
+    });
+  }
 
   deleteComment(id: number) {
     if (!id) return;

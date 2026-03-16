@@ -1,12 +1,12 @@
 <div class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-  <div class="bg-white w-[900px] rounded-lg shadow-lg overflow-hidden">
+  <div class="bg-white w-225 rounded-lg shadow-lg overflow-hidden">
     <!-- HEADER -->
     <div class="bg-[#1e3a5f] text-white p-3 flex justify-between">
       <h2>Task Detail — {{ task.title }}</h2>
       <button (click)="close.emit()">[x] Close</button>
     </div>
 
-    <div class="grid grid-cols-2">
+    <div class="grid grid-cols-3">
       <!-- LEFT SIDE -->
       <div class="p-4 border-r">
         <h3 class="font-bold">{{ task.title }}</h3>
@@ -41,7 +41,7 @@
       </div>
 
       <!-- RIGHT SIDE COMMENTS -->
-      <div class="p-4 flex flex-col h-[400px]">
+      <div class="p-4 flex flex-col h-100">
         <h3 class="font-bold mb-2">Comments</h3>
 
         <div class="flex-1 overflow-y-auto space-y-2">
@@ -84,23 +84,29 @@
               No comments yet
             </p>
           </div>
+
+          <!-- INPUT -->
+          <div class="mt-2 flex gap-2">
+            <input
+              [(ngModel)]="newComment"
+              class="flex-1 border p-2 rounded"
+              placeholder="Add a comment..."
+            />
+
+            <button
+              (click)="postComment()"
+              [disabled]="!newComment"
+              class="bg-blue-600 text-white px-3 py-1 rounded"
+            >
+              Post
+            </button>
+          </div>
         </div>
-
-        <!-- INPUT -->
-        <div class="mt-2 flex gap-2">
-          <input
-            [(ngModel)]="newComment"
-            class="flex-1 border p-2 rounded"
-            placeholder="Add a comment..."
-          />
-
-          <button
-            (click)="postComment()"
-            [disabled]="!newComment"
-            class="bg-blue-600 text-white px-3 py-1 rounded"
-          >
-            Post
-          </button>
+      </div>
+      <!-- ATTACHMENTS SECTION -->
+      <div class="p-4 flex flex-col h-100">
+        <div class="mt-8">
+          <app-attachments *ngIf="task" [taskId]="task.id"> </app-attachments>
         </div>
       </div>
     </div>

@@ -1,0 +1,88 @@
+<div class="mt-6">
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-lg font-semibold text-gray-700">Attachments</h3>
+    <span class="text-sm text-gray-500">{{ attachments.length }} / 5 files</span>
+  </div>
+
+  <!-- UPLOAD ZONE -->
+  <div
+    class="border-2 border-dashed border-blue-400 rounded-lg p-6 text-center bg-gray-50 hover:bg-gray-100 transition"
+  >
+    <p class="text-blue-500 font-medium">Drag & drop files here</p>
+
+    <p class="text-gray-400 text-sm mt-1">or</p>
+
+    <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput />
+
+    <button
+      (click)="fileInput.click()"
+      class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+    >
+      Choose File
+    </button>
+
+    <p class="text-xs text-gray-400 mt-2">
+      Max 5 MB per file • PDF, images, docs, zip • Max 5 files per task
+    </p>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="mt-4 space-y-3">
+    <div
+      *ngFor="let file of attachments"
+      class="flex items-center justify-between border rounded-lg p-3 bg-white shadow-sm"
+    >
+      <!-- FILE INFO -->
+      <div class="flex items-center space-x-3">
+        <!-- FILE ICON -->
+        <div
+          class="w-10 h-10 flex items-center justify-center rounded-md text-white font-bold"
+          [ngClass]="{
+            'bg-red-500': file.mimeType.includes('pdf'),
+            'bg-blue-500': file.mimeType.includes('image'),
+            'bg-indigo-500': file.mimeType.includes('word'),
+            'bg-yellow-500': file.mimeType.includes('zip'),
+          }"
+        >
+          {{ file.mimeType.split('/')[1] | uppercase }}
+        </div>
+
+        <!-- NAME -->
+        <div>
+          <p class="font-medium text-gray-800">
+            {{ file.originalName }}
+          </p>
+
+          <p class="text-xs text-gray-500">
+            {{ file.mimeType }} • {{ file.fileSizeBytes / 1024 | number: '1.0-0' }} KB
+          </p>
+
+          <span class="text-xs text-blue-500"> Stored as LONGBLOB in DB </span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="flex gap-2">
+        <button
+          (click)="download(file.id, file.originalName)"
+          class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Download
+        </button>
+
+        <button
+          (click)="delete(file.id)"
+          class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOADING ROW -->
+  <div *ngIf="uploading" class="mt-3 p-3 border rounded-lg bg-blue-50 text-blue-600 text-sm">
+    Saving to database...
+  </div>
+</div>

@@ -1,32 +1,24 @@
-Database Changes (IMPORTANT)
-USERS TABLE
+CREATE TABLE task_attachments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    
+    task_id BIGINT NOT NULL,
+    uploader_id BIGINT NOT NULL,
+    
+    original_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size_bytes BIGINT NOT NULL,
+    
+    file_data LONGBLOB NOT NULL,
+    
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-Add columns:
+    CONSTRAINT fk_task_attachment_task
+        FOREIGN KEY (task_id)
+        REFERENCES task(id)
+        ON DELETE CASCADE,
 
-ALTER TABLE users 
-ADD COLUMN role ENUM('ADMIN','MANAGER','MEMBER','VIEWER') DEFAULT 'MEMBER',
-ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-TEAMS TABLE
-CREATE TABLE teams (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) UNIQUE NOT NULL,
-  description TEXT,
-  manager_id BIGINT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_task_attachment_user
+        FOREIGN KEY (uploader_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
 );
-TEAM MEMBERS TABLE
-CREATE TABLE team_members (
-  team_id BIGINT,
-  user_id BIGINT,
-  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  PRIMARY KEY(team_id, user_id),
-
-  FOREIGN KEY(team_id) REFERENCES teams(id) ON DELETE CASCADE,
-  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-TASKS TABLE UPDATE
-ALTER TABLE tasks
-ADD COLUMN team_id BIGINT,
-ADD FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL;
