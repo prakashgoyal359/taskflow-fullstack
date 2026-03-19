@@ -1,0 +1,39 @@
+<div class="flex h-screen bg-gray-100">
+  <!-- LEFT SIDEBAR (future tabs) -->
+
+  <div class="w-60 bg-white p-4">
+   
+
+    <div (click)="setTab('theme')" class="p-2 cursor-pointer">Theme</div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="flex-1 p-6">
+    <!-- 🔥 LOAD COMPONENTS -->
+    <app-profile *ngIf="activeTab === 'profile'"></app-profile>
+
+    <app-theme *ngIf="activeTab === 'theme'"></app-theme>
+  </div>
+  <div class="w-60 bg-white border-r p-4">
+    <h2 class="text-lg font-semibold mb-4">Settings</h2>
+
+    <ul class="space-y-2 text-sm">
+      <li class="p-2 rounded bg-blue-100 font-medium">Profile</li>
+      <!-- future tabs -->
+      <li class="p-2 rounded text-gray-400">Security</li>
+      <li
+        (click)="activeTab = 'theme'"
+        class="p-2 rounded cursor-pointer"
+        [class.bg-blue-100]="activeTab === 'theme'"
+      >
+        Theme
+      </li>
+      <li class="p-2 rounded text-gray-400">Notifications</li>
+      <li class="p-2 rounded text-gray-400">Team Settings</li>
+    </ul>
+  </div>
+</div>
+
+
+
+

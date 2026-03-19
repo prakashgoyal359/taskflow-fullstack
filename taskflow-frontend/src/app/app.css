@@ -1,0 +1,18 @@
+/* LIGHT DEFAULT */
+:root {
+  --bg-primary: #f4f6fa;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+}
+
+/* DARK MODE */
+[data-theme='dark'] {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}

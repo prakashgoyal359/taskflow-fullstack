@@ -4,7 +4,7 @@ import { Register } from './auth/register/register';
 import { Dashboard } from './tasks/dashboard/dashboard';
 import { Teams } from './teams/teams';
 import { Admin } from './admin/admin';
-
+import { SettingsComponent } from './settings/settings.component';
 import { authGuard } from './guards/auth-guard';
 import { NotFound } from './shared/navbar/notFound/not-found';
 
@@ -25,6 +25,11 @@ export const routes: Routes = [
     path: 'teams',
     component: Teams,
     canActivate: [authGuard],
+  },
+
+  {
+    path: 'settings',
+    component: SettingsComponent,
   },
 
   {

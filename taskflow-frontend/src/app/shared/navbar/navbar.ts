@@ -14,6 +14,9 @@ export class Navbar {
   userName = 'User';
   role = '';
 
+  name: string = '';
+  avatarColor: string = '#2563EB';
+
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -23,6 +26,10 @@ export class Navbar {
     this.userName = localStorage.getItem('name') || 'User';
 
     this.role = localStorage.getItem('role') || '';
+  }
+
+  goToSettings() {
+    this.router.navigate(['/settings']);
   }
 
   logout() {

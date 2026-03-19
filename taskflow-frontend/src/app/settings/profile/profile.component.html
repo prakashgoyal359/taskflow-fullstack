@@ -1,0 +1,63 @@
+<!-- RIGHT CONTENT -->
+<div class="flex-1 p-6 overflow-auto">
+  <div class="bg-white p-6 rounded-xl shadow-md max-w-3xl">
+    <h2 class="text-xl font-semibold mb-4">Profile Settings</h2>
+
+    <!-- Avatar -->
+    <div class="flex items-center gap-4 mb-6">
+      <div
+        class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
+        [style.background]="user.avatarColour"
+      >
+        {{ user.fullName?.charAt(0) || 'U' }}
+      </div>
+
+      <div class="flex gap-2">
+        <div
+          *ngFor="let c of colors"
+          class="w-6 h-6 rounded-full cursor-pointer border-2"
+          [style.background]="c"
+          (click)="user.avatarColour = c"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="grid grid-cols-2 gap-4">
+      <input
+        [(ngModel)]="user.fullName"
+        placeholder="Full Name"
+        class="border p-2 rounded w-full"
+      />
+
+      <input [(ngModel)]="user.email" placeholder="Email" class="border p-2 rounded w-full" />
+    </div>
+
+    <!-- Bio -->
+    <textarea
+      [(ngModel)]="user.bio"
+      maxlength="200"
+      placeholder="Bio"
+      class="border p-2 rounded w-full mt-4"
+    ></textarea>
+
+    <p class="text-xs text-gray-400 text-right">{{ user.bio?.length || 0 }}/200</p>
+
+    <!-- Save -->
+    <button
+      (click)="saveProfile()"
+      class="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+    >
+      Save Profile
+    </button>
+
+    <!-- Danger Zone -->
+    <div class="border border-red-400 p-4 mt-6 rounded-lg bg-red-50">
+      <h3 class="text-red-600 font-semibold">Danger Zone</h3>
+
+      <p class="text-sm text-gray-600">This action cannot be undone.</p>
+
+      <button class="bg-red-600 text-white px-3 py-1 rounded mt-2">Delete My Account</button>
+    </div>
+  </div>
+</div>
